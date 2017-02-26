@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.contexts"?>
+<contexts>
+    <context id="browser" title="ECR Scan">
+        <topic href="help/browser.html" label="ECR Scan" />
+        <description>ECR Scan</description>
+    </context>
+</contexts>

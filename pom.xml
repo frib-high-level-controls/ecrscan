@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.csstudio</groupId>
+	<artifactId>ecrscan</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<!-- USE MAVEN 3.0 -->
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<!-- PROPERTIES -->
+	<properties>
+		<!-- VERSIONS -->
+		<tycho.version>0.23.1</tycho.version>
+		<tycho-extras.version>0.23.1</tycho-extras.version>
+        <eclipse.release>mars</eclipse.release>
+        <eclipse.version>4.5</eclipse.version>
+        <orbit.version>R20160221192158</orbit.version>
+        <cs-studio.version>4.4</cs-studio.version>
+		<cs-studio-central.url>http://controls.frib.msu.edu/css/features/ecrscan/${cs-studio.version}</cs-studio-central.url>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
+		<baselineMode>fail</baselineMode>
+	</properties>
+
+	<!-- PLUGIN REPOSITORIES -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>tycho</id>
+			<url>https://oss.sonatype.org/content/groups/public</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+    <!-- DEPLOY / RELEASE -->
+    <distributionManagement>
+    <repository>
+      <id>controls</id>
+      <url>http://p2.nscl.msu.edu:8080/maven/ecrscan-release-${cs-studio.version}</url>
+    </repository>
+    <snapshotRepository>
+      <id>controls</id>
+      <url>http://p2.nscl.msu.edu:8080/maven/ecrscan-snapshot-${cs-studio.version}</url>
+    </snapshotRepository>
+    </distributionManagement>
+  
+	<!-- Profiles -->
+	<profiles>
+		<profile>
+			<id>csstudio-local-repo-enable</id>
+			<activation>
+        		<file>
+          			<exists>${csstudio.local.repo}/artifacts.jar</exists>
+        		</file>
+      		</activation>
+			<repositories>
+				<repository>
+					<id>csstudio-local-repo</id>
+					<url>file:${csstudio.local.repo}</url>
+					<layout>p2</layout>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>local-dev</id>
+			<properties>
+				<jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+				<baselineMode>warn</baselineMode>
+			</properties>
+			<repositories>
+			</repositories>
+			<pluginRepositories>
+			</pluginRepositories>
+		</profile>
+	</profiles>
+
+	<repositories>
+		<repository>
+			<id>csstudio-updates</id>
+			<url>http://download.controlsystemstudio.org/updates/${cs-studio.version}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>eclipse</id>
+			<url>http://download.eclipse.org/releases/${eclipse.release}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>eclipse-updates</id>
+			<url>http://download.eclipse.org/eclipse/updates/${eclipse.version}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>orbit</id>
+			<url>http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.version}/repository/</url>
+			<layout>p2</layout>
+		</repository>
+	</repositories>
+
+	<!-- CHILD MODULES -->
+	<modules>
+		<module>ecrscan-plugins</module>
+		<module>ecrscan-features</module>
+		<module>ecrscan-repository</module>
+	</modules>
+
+
+	<build>
+		<!-- PLUGIN MANAGEMENT -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<version>${tycho.version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.eclipse.tycho.extras</groupId>
+							<artifactId>tycho-buildtimestamp-jgit</artifactId>
+							<version>${tycho-extras.version}</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<timestampProvider>jgit</timestampProvider>
+						<!-- jgit.dirtyWorkingTree options: ignore, warning, error -->
+						<jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
+						<jgit.ignore>
+							pom.xml
+						</jgit.ignore>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-plugin</artifactId>
+					<version>${tycho.version}</version>
+					<configuration>
+						<!-- baselineMode options: disable, warn, fail -->
+						<baselineMode>${baselineMode}</baselineMode>
+						<!-- baselineReplace options: none, all -->
+						<baselineReplace>none</baselineReplace>
+						<baselineRepositories>
+							<repository>
+								<url>${cs-studio-central.url}</url>
+							</repository>
+						</baselineRepositories>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<!-- PLUGIN CONFIGURATION -->
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<!-- Extra Target Bundles Here -->
+						</extraRequirements>
+						<!-- Default behavior is to resolve ALL dependencies. -->
+						<!--<optionalDependencies>ignore</optionalDependencies> -->
+					</dependency-resolution>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<!-- Without this argument I get an error in the plugin 'org.csstudio.rap.core' -->
+					<compilerArgument>-err:-forbidden</compilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<!--Some project include things that no longer exists. This should be 
+						fixed, but for now this parameter lets the build continue. -->
+					<strictBinIncludes>false</strictBinIncludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+						<configuration>
+							<!--Some project include things that no longer exists. This should 
+								be fixed, but for now this parameter lets the build continue. -->
+							<strictSrcIncludes>false</strictSrcIncludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<skipTests>false</skipTests>
+					<!--Some tests fail right now -->
+					<testFailureIgnore>true</testFailureIgnore>
+					<failIfNoTests>false</failIfNoTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

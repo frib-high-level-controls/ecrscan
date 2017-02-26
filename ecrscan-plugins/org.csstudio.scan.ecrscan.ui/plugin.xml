@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.csstudio.scan.ecrscan.ui.ECRScanViewerEditor"
+            default="false"
+            filenames="*.scn"
+            icon="icons/ksnapshot.png"
+            id="org.csstudio.scan.ecrscan.ui.editor.scanviewer"
+            name="ECR Scan Viewer">
+      </editor>
+   </extension>
+</plugin>

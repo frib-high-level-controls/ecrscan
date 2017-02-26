@@ -1,0 +1,24 @@
+.button {
+    -fx-font-weight: bold;
+}
+.tree-cell:scanitem {
+	-fx-background: paleturquoise ;
+}
+
+.tree-cell:traceitem {
+	-fx-background: honeydew ;
+}
+
+.tree-cell:filled:hover {
+	-fx-background-color: forestgreen, -fx-background ;
+	-fx-background-insets: 0,2 ;
+}
+
+.tree-cell:filled:selected {
+	-fx-background: forestgreen ;
+}
+
+.text-field:drop {
+  -fx-text-box-border: green ;
+  -fx-focus-color: green ;
+}

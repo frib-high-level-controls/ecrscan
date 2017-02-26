@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<toc link_to="../org.csstudio.ui.help/tocApps.xml#display" label="ECR Scan">
+  <topic label="ECR Scan">
+    <topic label="Overview" href="help/saverestore.html"/>
+    <topic href="help/browser.html" label="Browser">
+    </topic>
+    <topic href="help/preferences.html" label="Preferences">
+    </topic>
+    <anchor id="ECR Scan"/>
+  </topic>
+</toc>
