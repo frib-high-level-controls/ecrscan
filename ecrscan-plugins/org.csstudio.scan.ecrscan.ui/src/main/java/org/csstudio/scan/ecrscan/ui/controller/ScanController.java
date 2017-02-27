@@ -1,4 +1,4 @@
-package org.csstudio.scan.ecrscan.ui;
+package org.csstudio.scan.ecrscan.ui.controller;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -19,11 +19,12 @@ import java.util.concurrent.ExecutorService;
 import org.diirt.datasource.formula.ExpressionLanguage;
 import static org.diirt.datasource.ExpressionLanguage.*;
 
+import org.csstudio.scan.ecrscan.ui.controller.DataColumnsViewer;
+import org.csstudio.scan.ecrscan.ui.controller.ScanTable;
+import org.csstudio.scan.ecrscan.ui.controller.ScanTreeTableView;
 import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
-import org.csstudio.scan.ecrscan.ui.layout.DataColumnsViewer;
-import org.csstudio.scan.ecrscan.ui.layout.ScanTable;
-import org.csstudio.scan.ecrscan.ui.layout.ScanTreeTableView;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
+import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
 import org.csstudio.scan.ecrscan.ui.model.ScanItem;
 import org.csstudio.scan.ecrscan.ui.model.TraceItem;
 import org.csstudio.scan.ecrscan.ui.events.ScanItemSelectionEvent;
@@ -65,7 +66,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
-public class ScanController implements Initializable {
+public class ScanController<T extends AbstractScanTreeItem<?>>  {
     
 
     private PV<?, Object> pvScanServer;
@@ -77,75 +78,25 @@ public class ScanController implements Initializable {
     
     @FXML
     private GridPane rootPane;
-    @FXML
-    private ScanLineGraph multiLineGraphView;
+
     @FXML
     private RTScanPlot plot;
-    @FXML
-    private ScanTable scanTable;
-    @FXML
-    private TextField channelField;
-    @FXML
-    private TextField errorField;
-    @FXML
-    private DataColumnsViewer dataColumnsViewer;
-    @FXML
-    private ScanTreeTableView scanTreeTableView;
     
-    @FXML
-    private void onChannelChanged(ActionEvent event) {
-        if (pvScanServer != null) {
-            pvScanServer.close();
-            //valueField.setText(null);
-            changeTableValue(null, false);
-            errorField.setText(null);
-        }
-        if (eventHandler != null) {
-            removeSelectionListener(eventHandler);
-        }
-        eventHandler = new EventHandler<ScanItemSelectionEvent>() {
-            @Override
-            public void handle(final ScanItemSelectionEvent event) {
-                    final  List<? extends TreeItem<AbstractScanTreeItem<?>>> scanItems = event.getScanItems();
-                    final SELECTION selectionType = event.getSelectionType();
-                    setColumn(scanItems,selectionType);
-                    //setGraph(dataSeriesIndex,ids,selectionType);
-                    //setScale(dataSeriesIndex, selectedIndices);
-            }
-        };
-        addSelectionListener(eventHandler);
-
-        pvScanServer = PVManager.readAndWrite(ExpressionLanguage.formula(channelField.getText()))
-                .readListener((PVReaderEvent<Object> e) -> {
-                    changeTableValue(e.getPvReader().getValue(), e.getPvReader().isConnected());
-                })
-                .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
-                .notifyOn(Executors.javaFXAT())
-                .asynchWriteAndMaxReadRate(TimeDuration.ofHertz(10));
-        
+    private ModelTreeTable<T> model;
+    
+    public void initModel(ModelTreeTable<T> model) {
+        this.model = model;
         plot.getXAxis().setName("");
         plot.getYAxes().get(0).setName("");
         plot.getXAxis().setAutoscale(true);
         plot.getYAxes().get(0).setAutoscale(true);
         plot.getXAxis().setGridVisible(true);
-        // multiLineGraphView.setMinSize(0,0);
-        
         
         if(scanTreeTableEventHandler!=null){
-            scanTreeTableView.getTreeTableRoot().removeEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
+            model.getTree().removeEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
         }
         scanTreeTableEventHandler = new ScanTreeTableEventHandler();
-        scanTreeTableView.getTreeTableRoot().addEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
-    }
-    
-    private void changeTableValue(Object obj, boolean connected) {
-        if (obj != null) {
- //           scanTable.setValue(obj, connected);
-            scanTreeTableView.setValue((VTable)obj, null, connected);
-        } else {
-         //   valueField.setText("");
-        }
-        //setAlarm(obj, connected);  
+        model.getTree().addEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
     }
     
     private void setColumn(List<? extends TreeItem<AbstractScanTreeItem<?>>> scanItems, SELECTION selectionType) {
@@ -360,11 +311,5 @@ public class ScanController implements Initializable {
                 pvReaderListeners.remove(pvReaderListener.getKey());
             }
         }
-    }
-    
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // TODO Auto-generated method stub
-        
     }
 }

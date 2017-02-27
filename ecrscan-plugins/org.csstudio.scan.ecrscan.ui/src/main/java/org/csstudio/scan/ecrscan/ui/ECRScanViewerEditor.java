@@ -10,6 +10,7 @@
  */
 package org.csstudio.scan.ecrscan.ui;
 
+import org.csstudio.scan.ecrscan.ui.controller.ScanController;
 import org.csstudio.ui.fx.util.FXEditorPart;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;

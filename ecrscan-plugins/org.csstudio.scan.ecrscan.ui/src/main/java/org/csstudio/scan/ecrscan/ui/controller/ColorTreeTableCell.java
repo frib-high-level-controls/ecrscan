@@ -1,4 +1,4 @@
-package org.csstudio.scan.ecrscan.ui.model;
+package org.csstudio.scan.ecrscan.ui.controller;
 
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ContentDisplay;

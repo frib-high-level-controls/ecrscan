@@ -1,35 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import org.csstudio.scan.ecrscan.ui.*?>
-<?import org.diirt.javafx.graphene.*?>
 <?import org.csstudio.javafx.rtplot.*?>
-<?import org.csstudio.scan.ecrscan.ui.ScanTreeTableView?>
 
-<GridPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.csstudio.scan.ecrscan.ui.ScanController">
-  <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="567.0" minWidth="10.0" prefWidth="467.0" />
-    <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="441.0" minWidth="10.0" prefWidth="60.0" />
-      <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="441.0" minWidth="10.0" prefWidth="60.0" />
-  </columnConstraints>
-  <rowConstraints>
-    <RowConstraints maxHeight="206.0" minHeight="10.0" prefHeight="31.0" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="243.0" minHeight="10.0" prefHeight="27.0" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="298.0" minHeight="10.0" prefHeight="24.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="298.0" minHeight="10.0" prefHeight="137.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="298.0" minHeight="10.0" prefHeight="52.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="298.0" minHeight="10.0" prefHeight="130.0" vgrow="SOMETIMES" />
-  </rowConstraints>
-   <children>
-      <!--  <ScanLineGraph fx:id="multiLineGraphView" prefHeight="294.0" prefWidth="436.0" stylesheets="@../styles/Styles.css" GridPane.rowSpan="2147483647" /> -->
-      <RTScanPlot fx:id="plot" prefHeight="294.0" prefWidth="436.0" stylesheets="@../styles/Styles.css" GridPane.rowSpan="2147483647"/>
-      <TextField fx:id="channelField" onAction="#onChannelChanged" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
-      <DataColumnsViewer fx:id="dataColumnsViewer" GridPane.rowIndex="4" />
-      <ScanTable fx:id="scanTable" fitToWidth="true" prefHeight="1160.0" prefWidth="421.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" />
-      <TextField fx:id="errorField" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" GridPane.valignment="BOTTOM" />  
-      <ScanTreeTableView fx:id="scanTreeTableView" prefHeight="294.0" prefWidth="436.0" stylesheets="@../styles/Styles.css" GridPane.rowIndex="5" GridPane.rowSpan="2147483647"/>
-   </children>
-</GridPane>
+<fx:root type="javafx.scene.layout.BorderPane" fx:controller="ScanController" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <RTScanPlot fx:id="plot" prefHeight="200.0" prefWidth="200.0" />
+    </center>
+</fx:root>

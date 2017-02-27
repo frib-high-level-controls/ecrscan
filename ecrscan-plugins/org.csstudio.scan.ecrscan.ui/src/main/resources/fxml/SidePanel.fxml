@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.csstudio.scan.ecrscan.ui.*?>
+<?import org.csstudio.javafx.rtplot.*?>
+
+
+<fx:root fx:controller="SidePanelController" type="javafx.scene.layout.BorderPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+  <center>
+    <GridPane BorderPane.alignment="CENTER">
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+      <children>
+        <TextField fx:id="channelField" onAction="#onChannelChanged"
+          prefHeight="16.0" prefWidth="125.0">
+          <GridPane.margin>
+            <Insets left="5.0" right="5.0" />
+          </GridPane.margin>
+        </TextField>
+      </children>
+    </GridPane>
+  </center>
+</fx:root>
