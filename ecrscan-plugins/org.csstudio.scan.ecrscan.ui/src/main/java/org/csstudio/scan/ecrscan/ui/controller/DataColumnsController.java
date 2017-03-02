@@ -32,6 +32,11 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
     
     public DataColumnsController() {
         
+        
+    }
+    
+    public void initModel(ModelTreeTable<T> model) {
+        this.model = model;
         columnListView.setOnDragDetected(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 /* drag was detected, start a drag-and-drop gesture*/
@@ -56,10 +61,16 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
         });
         
         model.selectedScanProperty().addListener((observable, oldValue, newValue) -> {
+            String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
+            // Skip if it's the same channel
+            if (pvReader != null){
+                if (pvReader.getName().equals(channel)){
+                    return;
+                }
+            }
             if (pvReader != null) {
                 pvReader.close();
             }
-            String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
             pvReader = PVManager.read(channel(channel))
                     .readListener((PVReaderEvent<Object> e) -> {
                         Object readObject = e.getPvReader().getValue();
@@ -69,19 +80,22 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
                             setItems(columnNames);
                         }
                     })
-                    .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
+                    .timeout(TimeDuration.ofSeconds(2), "Still connecting...")
                     .notifyOn(Executors.javaFXAT())
-                    .maxRate(TimeDuration.ofHertz(1));
+                    .maxRate(TimeDuration.ofHertz(10));
         });
         
     }
     
-    public void initModel(ModelTreeTable<T> model) {
-        this.model = model;
+    public void closeConnections() {
+        if (pvReader != null) {
+            pvReader.close();
+        }
     }
     
     private void setItems(List<String> columnNames) {
         columnListView.getItems().clear();
         columnListView.getItems().addAll(columnNames);
     }
+    
 }

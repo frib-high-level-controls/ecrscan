@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<fx:root fx:controller="ScanTreeTableController" prefHeight="1160.0" prefWidth="421.0" type="javafx.scene.layout.BorderPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:controller="org.csstudio.scan.ecrscan.ui.controller.ScanTreeTableController" prefHeight="1160.0" prefWidth="421.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <GridPane BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -39,7 +39,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <TextField maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.valignment="CENTER" fx:id="xformula">
+                  <TextField maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.halignment="CENTER" GridPane.valignment="CENTER" fx:id="xformula" onAction="#onChannelChanged">
                      <padding>
                         <Insets left="5.0" right="5.0" />
                      </padding>
@@ -63,4 +63,4 @@
    <padding>
       <Insets bottom="10.0" top="10.0" />
    </padding>
-</fx:root>
+</BorderPane>

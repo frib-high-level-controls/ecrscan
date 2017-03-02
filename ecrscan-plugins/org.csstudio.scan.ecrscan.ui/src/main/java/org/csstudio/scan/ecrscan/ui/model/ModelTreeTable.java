@@ -3,14 +3,10 @@ package org.csstudio.scan.ecrscan.ui.model;
 import static java.util.stream.Collectors.toList;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
-import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -26,6 +22,7 @@ public class ModelTreeTable<T> {
     
     private final Function<T, ObservableList<? extends T>> children ;
     private final StringProperty scanServer = new SimpleStringProperty( this , "", null);
+    private final StringProperty xformula = new SimpleStringProperty( this , "", null);
     private final ObjectProperty<T> selectedScan = new SimpleObjectProperty<>(null);
     private final ObjectProperty<TreeItem<T>> tree = new SimpleObjectProperty<>(null);
     
@@ -35,11 +32,10 @@ public class ModelTreeTable<T> {
             Function<T, ObservableValue<Instant>> finished,
             Function<T, ObservableValue<Instant>> created,
             Function<T, ObservableValue<Number>> percent,
-            Function<T, ObservableValue<ScanValueDataProvider>> scanValueDataProvider,
             Function<T, ObservableValue<String>> yformula,
             Function<T, ObservableValue<Color>> color,
-            Function<T, ObservableValue<TraceType>> traceType,
-            Function<T, ObservableValue<Integer>> traceWidth,
+            Function<T, ObservableValue<TraceType>> type,
+            Function<T, ObservableValue<Integer>> width,
             Function<T, ObservableValue<PointType>> pointType,
             Function<T, ObservableValue<Integer>> pointSize,
             Function<T, ObservableValue<Integer>> yaxis,
@@ -57,16 +53,15 @@ public class ModelTreeTable<T> {
             Function<T, ObservableValue<Instant>> finished,
             Function<T, ObservableValue<Instant>> created,
             Function<T, ObservableValue<Number>> percent,
-            Function<T, ObservableValue<ScanValueDataProvider>> scanValueDataProvider,
             Function<T, ObservableValue<String>> yformula,
             Function<T, ObservableValue<Color>> color,
-            Function<T, ObservableValue<TraceType>> traceType,
-            Function<T, ObservableValue<Integer>> traceWidth,
+            Function<T, ObservableValue<TraceType>> type,
+            Function<T, ObservableValue<Integer>> width,
             Function<T, ObservableValue<PointType>> pointType,
             Function<T, ObservableValue<Integer>> pointSize,
             Function<T, ObservableValue<Integer>> yaxis) {
         this(rootItem, children, name, id, finished, created, percent, 
-                scanValueDataProvider, yformula, color, traceType, traceWidth, pointType, pointSize, yaxis, x -> null);
+                yformula, color, type, width, pointType, pointSize, yaxis, x -> null);
     }
     
     private TreeItem<T> createTreeItem(T t) {
@@ -126,4 +121,21 @@ public class ModelTreeTable<T> {
     public final javafx.scene.control.TreeItem<T> getTree() {
         return this.treeProperty().get();
     }
+
+    public final StringProperty xformulaProperty() {
+        return this.xformula;
+    }
+    
+
+    public final java.lang.String getXformula() {
+        return this.xformulaProperty().get();
+    }
+    
+
+    public final void setXformula(final java.lang.String xformula) {
+        this.xformulaProperty().set(xformula);
+    }
+    
+    
+    
 }

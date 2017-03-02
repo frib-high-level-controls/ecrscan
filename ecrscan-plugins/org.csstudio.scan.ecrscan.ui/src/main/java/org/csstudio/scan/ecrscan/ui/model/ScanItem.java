@@ -1,12 +1,10 @@
 package org.csstudio.scan.ecrscan.ui.model;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
-import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
 import org.diirt.util.array.ListNumber;
 import org.diirt.vtype.VTable;
 
@@ -22,7 +20,6 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -35,7 +32,6 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
                 finished,
                 created,
                 percent,
-                scanValueDataProvider,
                 yformula,
                 color,
                 traceType,
@@ -60,7 +56,6 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
                 null,
                 null,
                 null,
-                null,
                 traces, TraceItem::new);
     }
     
@@ -73,7 +68,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
         if (data instanceof ListNumber) {
             return ((ListNumber) data).getInt(columnIndex);
         } else if (data instanceof List) {
-            return (Number)((List) data).get(columnIndex);
+            return (Number)((List<?>) data).get(columnIndex);
         } else {
             return 0;
         }
@@ -82,7 +77,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
     private static Instant getFinished(VTable vTable, int columnIndex) {
         Object data = vTable.getColumnData(4);
         if (data instanceof List) {
-            return (Instant)((List) data).get(columnIndex);
+            return (Instant)((List<?>) data).get(columnIndex);
         } else {
             return Instant.MIN;
         }
@@ -91,7 +86,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
     private static Instant getCreated(VTable vTable, int columnIndex) {
         Object data = vTable.getColumnData(1);
         if (data instanceof List) {
-            return (Instant)((List) data).get(columnIndex);
+            return (Instant)((List<?>) data).get(columnIndex);
         } else {
             return Instant.MIN;
         }
@@ -102,7 +97,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
         if (data instanceof ListNumber) {
             return ((ListNumber) data).getInt(columnIndex);
         } else if (data instanceof List) {
-            return (Number)((List) data).get(columnIndex);
+            return (Number)((List<?>) data).get(columnIndex);
         } else {
             return 0;
         }

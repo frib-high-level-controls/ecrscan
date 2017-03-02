@@ -9,21 +9,15 @@ import org.csstudio.javafx.rtplot.data.PlotDataItem;
 import org.csstudio.javafx.rtplot.data.PlotDataProvider;
 import org.csstudio.javafx.rtplot.data.SimpleDataItem;
 import org.diirt.util.array.ArrayDouble;
-import org.diirt.util.array.ListInt;
 import org.diirt.util.array.ListNumber;
-import org.diirt.vtype.VEnum;
-import org.diirt.vtype.VEnumArray;
-import org.diirt.vtype.VNumber;
 import org.diirt.vtype.VNumberArray;
-import org.diirt.vtype.VStatistics;
 import org.diirt.vtype.VTable;
-import org.diirt.vtype.VType;
 import org.diirt.vtype.table.VTableFactory;
 
 public class ScanValueDataProvider implements PlotDataProvider<Double> {
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private volatile ListNumber x_data, y_data, error_data;
+    private volatile ListNumber x_data, y_data;
     private volatile int size = 0;
 
     /** {@inheritDoc} */

@@ -4,8 +4,6 @@ import java.time.Instant;
 
 import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
-import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,21 +25,20 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     private final Property< Instant > created = new SimpleObjectProperty< Instant >( this , "created" );
     private final Property< Number > percent = new SimpleObjectProperty< Number >( this , "percent" );
     
-    private final Property< ScanValueDataProvider> scanValueDataProvider = new SimpleObjectProperty< ScanValueDataProvider >( this, "scanValueDataProvider" );
     private final StringProperty yformula = new SimpleStringProperty();
     private final Property< Color > color = new SimpleObjectProperty< Color >( this , "color" );
-    private final Property< TraceType > traceType = new SimpleObjectProperty< TraceType >( this , "traceType" );
-    private final Property< Integer > traceWidth = new SimpleObjectProperty< Integer >( this , "traceWidth" );
+    private final Property< TraceType > type = new SimpleObjectProperty< TraceType >( this , "type" );
+    private final Property< Integer > width = new SimpleObjectProperty< Integer >( this , "width" );
     private final Property< PointType > pointType = new SimpleObjectProperty< PointType >( this , "pointType" );
     private final Property< Integer > pointSize = new SimpleObjectProperty< Integer >( this , "pointSize" );
     private final Property< Integer > yaxis = new SimpleObjectProperty< Integer >( this , "yaxis" );
 
-    private final Function13<String, Number, Instant, Instant, Number, ScanValueDataProvider, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction;
+    private final Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction;
     private final ObservableList<T> items;
     
     @FunctionalInterface
-    interface Function13<One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Eleven, Twelve, Thirteen, Fourteen> {
-        public Fourteen apply(One one, Two two, Three three, Four four, Five five, Six six, Seven seven, Eight eight, Nine nine, Ten ten, Eleven eleven, Twelve twelve, Thirteen thirteen);
+    interface Function12<One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Eleven, Twelve, Thirteen> {
+        public Thirteen apply(One one, Two two, Three three, Four four, Five five, Six six, Seven seven, Eight eight, Nine nine, Ten ten, Eleven eleven, Twelve twelve);
     }
     
 
@@ -51,7 +48,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -59,7 +55,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             PointType pointType,
             Integer pointSize,
             Integer yaxis,
-            ObservableList<T> items, Function13<String, Number, Instant, Instant, Number, ScanValueDataProvider, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction) {
+            ObservableList<T> items, Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction) {
         this.items = items;
         this.itemFunction = itemFunction;
         setName(name);
@@ -68,14 +64,13 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
         setCreated(created);
         setPercent(percent);
         
-        setScanValueDataProvider(scanValueDataProvider);
         setYformula(yformula);
         setColor(color);
-        setTraceType(traceType);
-        setTraceWidth(traceWidth);
+        setType(traceType);
+        setWidth(traceWidth);
         setPointType(pointType);
         setPointSize(pointSize);
-        setYaxis(yaxis);
+        setYAxis(yaxis);
     }
     
 
@@ -85,7 +80,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -100,7 +94,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
-                scanValueDataProvider,
                 yformula,
                 color,
                 traceType,
@@ -108,7 +101,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 pointType,
                 pointSize,
                 yaxis,
-                items, (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve, thirteen) -> null);
+                items, (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve) -> null);
     }
     
 
@@ -118,7 +111,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -126,14 +118,13 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             PointType pointType,
             Integer pointSize,
             Integer yaxis,
-            Function13<String, Number, Instant, Instant, Number, ScanValueDataProvider, String, Color, TraceType, Integer, PointType, Integer, Integer, T>  itemFunction) {
+            Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T>  itemFunction) {
         this(
                 name,
                 id,
                 finished,
                 created,
                 percent,
-                scanValueDataProvider,
                 yformula,
                 color,
                 traceType,
@@ -151,7 +142,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -165,7 +155,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
-                scanValueDataProvider,
                 yformula,
                 color,
                 traceType,
@@ -173,7 +162,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 pointType,
                 pointSize,
                 yaxis,
-                FXCollections.observableArrayList(), (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve, thirteen) -> null);
+                FXCollections.observableArrayList(), (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve) -> null);
     }
     
 
@@ -189,7 +178,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
-            ScanValueDataProvider scanValueDataProvider,
             String yformula,
             Color color,
             TraceType traceType,
@@ -203,7 +191,6 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
-                scanValueDataProvider,
                 yformula,
                 color,
                 traceType,
@@ -302,26 +289,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
         this.percentProperty().setValue(percent);
     }
     
-
-
-    public final Property<ScanValueDataProvider> scanValueDataProviderProperty() {
-        return this.scanValueDataProvider;
-    }
     
-
-
-    public final org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider getScanValueDataProvider() {
-        return this.scanValueDataProviderProperty().getValue();
-    }
-    
-
-
-    public final void setScanValueDataProvider(
-            final org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider scanValueDataProvider) {
-        this.scanValueDataProviderProperty().setValue(scanValueDataProvider);
-    }
-    
-
 
     public final StringProperty yformulaProperty() {
         return this.yformula;
@@ -359,38 +327,38 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     
 
 
-    public final Property<TraceType> traceTypeProperty() {
-        return this.traceType;
+    public final Property<TraceType> typeProperty() {
+        return this.type;
     }
     
 
 
-    public final org.csstudio.javafx.rtplot.TraceType getTraceType() {
-        return this.traceTypeProperty().getValue();
+    public final org.csstudio.javafx.rtplot.TraceType getType() {
+        return this.typeProperty().getValue();
     }
     
 
 
-    public final void setTraceType(final org.csstudio.javafx.rtplot.TraceType traceType) {
-        this.traceTypeProperty().setValue(traceType);
+    public final void setType(final org.csstudio.javafx.rtplot.TraceType traceType) {
+        this.typeProperty().setValue(traceType);
     }
     
 
 
-    public final Property<Integer> traceWidthProperty() {
-        return this.traceWidth;
+    public final Property<Integer> widthProperty() {
+        return this.width;
     }
     
 
 
-    public final java.lang.Integer getTraceWidth() {
-        return this.traceWidthProperty().getValue();
+    public final Integer getWidth() {
+        return this.widthProperty().getValue();
     }
     
 
 
-    public final void setTraceWidth(final java.lang.Integer traceWidth) {
-        this.traceWidthProperty().setValue(traceWidth);
+    public final void setWidth(final Integer traceWidth) {
+        this.widthProperty().setValue(traceWidth);
     }
     
 
@@ -419,13 +387,13 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     
 
 
-    public final java.lang.Integer getPointSize() {
+    public final Integer getPointSize() {
         return this.pointSizeProperty().getValue();
     }
     
 
 
-    public final void setPointSize(final java.lang.Integer pointSize) {
+    public final void setPointSize(final Integer pointSize) {
         this.pointSizeProperty().setValue(pointSize);
     }
     
@@ -437,13 +405,13 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     
 
 
-    public final java.lang.Integer getYaxis() {
+    public final Integer getYAxis() {
         return this.yaxisProperty().getValue();
     }
     
 
 
-    public final void setYaxis(final java.lang.Integer yaxis) {
+    public final void setYAxis(final Integer yaxis) {
         this.yaxisProperty().setValue(yaxis);
     }
     

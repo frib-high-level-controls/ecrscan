@@ -1,7 +1,5 @@
 package org.csstudio.scan.ecrscan.ui.events;
 
-import java.util.List;
-
 import javafx.event.Event;
 import javafx.event.EventType;
 

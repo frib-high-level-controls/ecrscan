@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.csstudio.scan.ecrscan.ui.*?>
-<?import org.csstudio.javafx.rtplot.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
 
-<fx:root fx:controller="SidePanelController" type="javafx.scene.layout.BorderPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+<BorderPane fx:controller="org.csstudio.scan.ecrscan.ui.controller.SidePanelController" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
   <center>
     <GridPane BorderPane.alignment="CENTER">
       <columnConstraints>
@@ -31,4 +33,4 @@
       </children>
     </GridPane>
   </center>
-</fx:root>
+</BorderPane>

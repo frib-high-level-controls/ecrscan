@@ -2,8 +2,6 @@ package org.csstudio.scan.ecrscan.ui.events;
 
 import java.util.List;
 
-import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
-
 import javafx.event.Event;
 import javafx.event.EventType;
 import javafx.scene.control.TreeItem;

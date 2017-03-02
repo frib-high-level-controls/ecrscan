@@ -2,9 +2,10 @@
 
 <?import org.csstudio.scan.ecrscan.ui.*?>
 <?import org.csstudio.javafx.rtplot.*?>
+<?import javafx.scene.layout.BorderPane?>
 
-<fx:root type="javafx.scene.layout.BorderPane" fx:controller="ScanController" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:controller="org.csstudio.scan.ecrscan.ui.controller.ScanController" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <center>
         <RTScanPlot fx:id="plot" prefHeight="200.0" prefWidth="200.0" />
     </center>
-</fx:root>
+</BorderPane>

@@ -10,31 +10,28 @@
  */
 package org.csstudio.scan.ecrscan.ui;
 
-import org.csstudio.scan.ecrscan.ui.controller.ScanController;
 import org.csstudio.ui.fx.util.FXEditorPart;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
 
-public class ECRScanViewerEditor extends FXEditorPart {
+public class ECRScanViewerEditor extends FXEditorPart implements IShellProvider {
 
     /** The editor ID */
     public static final String ID = "org.csstudio.scan.ecrscan.ui.editor.viewer";
-
-    private final ScanController controller;
 
     /**
      * Constructs a new editor.
      */
     public ECRScanViewerEditor() {
-        controller = new ScanController();
     }
 
     /*
@@ -46,11 +43,6 @@ public class ECRScanViewerEditor extends FXEditorPart {
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
     }
-
-    private void init() {
-
-    }
-
 
 
     /*
@@ -93,6 +85,7 @@ public class ECRScanViewerEditor extends FXEditorPart {
     @Override
     public void dispose() {
         super.dispose();
+        Scan.closeConnections();
     }
 
     /*
@@ -140,5 +133,10 @@ public class ECRScanViewerEditor extends FXEditorPart {
     @Override
     public void setFxFocus() {
 
+    }
+    
+    @Override
+    public Shell getShell() {
+        return getSite().getShell();
     }
 }

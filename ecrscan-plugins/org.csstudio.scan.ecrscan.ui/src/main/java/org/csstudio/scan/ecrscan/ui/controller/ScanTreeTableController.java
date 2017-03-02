@@ -2,8 +2,6 @@ package org.csstudio.scan.ecrscan.ui.controller;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +12,6 @@ import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
 import org.csstudio.javafx.rtplot.util.RGBFactory;
 import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
-import org.csstudio.scan.ecrscan.ui.events.ScanItemSelectionEvent;
-import org.csstudio.scan.ecrscan.ui.events.ScanItemSelectionEvent.SELECTION;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
 import org.csstudio.scan.ecrscan.ui.model.ScanItem;
@@ -29,6 +25,8 @@ import org.diirt.javafx.util.Executors;
 import org.diirt.util.array.ListNumber;
 import org.diirt.util.time.TimeDuration;
 import org.diirt.vtype.VTable;
+
+
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -48,12 +46,14 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.ComboBoxTreeTableCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.converter.IntegerStringConverter;
 
 public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
 
@@ -72,12 +72,63 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     private Button deleteButton;
     @FXML
     private CheckBox useAsDefault;
+    @FXML
+    private void onChannelChanged(ActionEvent event) {
+        model.setXformula(xformula.getText());
+    }
     
     private ModelTreeTable<T> model;
 
     public ScanTreeTableController() {
         
-        treeTableView.setEditable(true);
+        
+    }
+    
+    private final class SelectedTableItemsChangeListener implements ListChangeListener<TreeItem<T>> {
+        private final TreeTableView<T> treeTableView;
+
+        public SelectedTableItemsChangeListener(final TreeTableView<T> treeTableView) {
+                this.treeTableView = treeTableView;
+        }
+
+        @Override
+        public void onChanged(final ListChangeListener.Change<? extends TreeItem<T>> change) {
+                final boolean next = change.next();
+                if (next) {
+                    final List<TreeItem<T>> dataItems = treeTableView.getSelectionModel().getSelectedItems();
+                    if (!dataItems.isEmpty()){
+                        if (dataItems.get(0).getValue() instanceof TraceItem) {
+                            T scanItem = dataItems.get(0).getParent().getValue();
+                            if(scanItem instanceof ScanItem) {
+                                model.setSelectedScan(scanItem);
+                            }
+                        }else if (dataItems.get(0).getValue() instanceof ScanItem) {
+                            T scanItem = dataItems.get(0).getValue();
+                            model.setSelectedScan(scanItem);
+                        }
+                    }
+                }
+        }
+    }
+
+    public void initModel(ModelTreeTable<T> model) {
+        this.model = model;
+        treeTableView.setRoot(model.getTree());
+        
+        this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
+            if (pvScanServer != null) {
+                pvScanServer.close();
+            }
+
+            pvScanServer = PVManager.readAndWrite(ExpressionLanguage.formula(newValue))
+                    .readListener((PVReaderEvent<Object> e) -> {
+                        fillTreeTable(e.getPvReader().getValue(), e.getPvReader().isConnected());
+                    })
+                    .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
+                    .notifyOn(Executors.javaFXAT())
+                    .asynchWriteAndMaxReadRate(TimeDuration.ofHertz(10));
+        });
+        
         
         Map<String,Class<?>> columnMap = new LinkedHashMap<String,Class<?>>();
         columnMap.put("name", String.class);
@@ -87,8 +138,8 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         columnMap.put("percent", Number.class);
         columnMap.put("yformula", String.class);
         columnMap.put("color", Color.class);
-        columnMap.put("traceType", TraceType.class);
-        columnMap.put("traceWidth", Integer.class);
+        columnMap.put("type", TraceType.class);
+        columnMap.put("width", Integer.class);
         columnMap.put("pointType", PointType.class);
         columnMap.put("pointSize", Integer.class);
         for (Entry<String, Class<?>> columnSet : columnMap.entrySet()){
@@ -123,6 +174,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
             }
             if (clazz.equals(Integer.class)) {
                 TreeTableColumn<T,Integer> column = new TreeTableColumn<T,Integer>(columnSet.getKey());
+                column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn(new IntegerStringConverter()));
                 column.setCellValueFactory(new TreeItemPropertyValueFactory<>(columnSet.getKey()));
                 treeTableView.getColumns().add(column);
             }
@@ -143,6 +195,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
             if (clazz.equals(Instant.class)) {
                 TreeTableColumn<T,Instant> column = new TreeTableColumn<T,Instant>(columnSet.getKey());
                 column.setCellValueFactory(new TreeItemPropertyValueFactory<>(columnSet.getKey()));
+                column.setEditable(true);
                 treeTableView.getColumns().add(column);
             }
             if (clazz.equals(String.class)) {
@@ -187,8 +240,10 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 treeTableView.getColumns().add(column);
             }
 
+            
         }
 
+        treeTableView.setEditable(true);
         // default is to use the current x/y formula for the next scan
         useAsDefault.setSelected(true);
         treeTableView.setShowRoot(false);
@@ -339,59 +394,12 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 event.consume();
              }
         });
-        
     }
     
-    public String getXFormula() {
-        return xformula.getText();
-    }
-    
-    public TreeItem<T> getTreeTableRoot() {
-        return treeTableView.getRoot();
-    }
-    
-    private final class SelectedTableItemsChangeListener implements ListChangeListener<TreeItem<T>> {
-        private final TreeTableView<T> treeTableView;
-
-        public SelectedTableItemsChangeListener(final TreeTableView<T> treeTableView) {
-                this.treeTableView = treeTableView;
+    public void closeConnections() {
+        if (pvScanServer != null) {
+            pvScanServer.close();
         }
-
-        @Override
-        public void onChanged(final ListChangeListener.Change<? extends TreeItem<T>> change) {
-                final boolean next = change.next();
-                if (next) {
-                    final List<TreeItem<T>> dataItems = treeTableView.getSelectionModel().getSelectedItems();
-                    if (dataItems.get(0).getValue() instanceof TraceItem) {
-                        T scanItem = dataItems.get(0).getParent().getValue();
-                        if(scanItem instanceof ScanItem) {
-                            model.setSelectedScan(scanItem);
-                        }
-                    }else if (dataItems.get(0).getValue() instanceof ScanItem) {
-                        T scanItem = dataItems.get(0).getValue();
-                        model.setSelectedScan(scanItem);
-                    }   
-                }
-        }
-    }
-
-    public void initModel(ModelTreeTable<T> model) {
-        this.model = model;
-        treeTableView.setRoot(model.getTree());
-        
-        this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
-            if (pvScanServer != null) {
-                pvScanServer.close();
-            }
-
-            pvScanServer = PVManager.readAndWrite(ExpressionLanguage.formula(newValue))
-                    .readListener((PVReaderEvent<Object> e) -> {
-                        fillTreeTable(e.getPvReader().getValue(), e.getPvReader().isConnected());
-                    })
-                    .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
-                    .notifyOn(Executors.javaFXAT())
-                    .asynchWriteAndMaxReadRate(TimeDuration.ofHertz(1));
-        });
     }
     
     private int getSize(VTable vTable, int column){
@@ -399,7 +407,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         if (data instanceof ListNumber) {
             return ((ListNumber) data).size();
         } else if (data instanceof List) {
-            return ((List) data).size();
+            return ((List<?>) data).size();
         } else {
             return 0;
         }
@@ -419,7 +427,9 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                     for(TraceItem traceItem:scanItem.getItems()){
                         traceList.add(traceItem);
                     }
-                    traces.put(scanItem.getId(), traceList);
+                    if (!traceList.isEmpty()) {
+                        traces.put(scanItem.getId(), traceList);
+                    }
                 }
             }
             VTable vTable = (VTable) value;
@@ -428,11 +438,11 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
             for (int n = 0; n < getSize(vTable,0); n++) {
                 ScanItem scanItem = new ScanItem(vTable, n);
                 // if the first entry does not have a scan, and use default is selected, repeat the last traces
-                if(n==0 && useAsDefault.isSelected() == true && traces.get(scanItem.getId()).isEmpty()) {
-                    addDefaultTraces = Optional.of(scanItem.getId());
-                    TraceItem traceItem = new TraceItem(new ScanValueDataProvider(), yformula.getText(), RGBFactory.next(),
-                            TraceType.AREA, 1, PointType.NONE, 1, 0);
-                    scanItem.getItems().add(traceItem);
+                // Should probably do this at the end, instead of in a loop
+                if(!model.getTree().getChildren().isEmpty()) {
+                    if(n==0 && useAsDefault.isSelected() == true && model.getTree().getChildren().get(0).getValue().getItems().isEmpty()) {
+                        addDefaultTraces = Optional.of(scanItem.getId());
+                    }
                 }
                 columns.put(scanItem.getId(),scanItem);
             }
@@ -442,8 +452,14 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 }
             }
             if (addDefaultTraces.isPresent()){
-                List<TraceItem> lastTraces = new ArrayList<>(traces.values()).get(0);
-                columns.get(addDefaultTraces.get()).getItems().setAll(lastTraces);
+                List<List<TraceItem>> lastTraces = new ArrayList<>(traces.values());
+                if(lastTraces.size() > 0) {
+                    for(TraceItem lastTrace:lastTraces.get(0)){
+                        TraceItem newTrace = new TraceItem(new ScanValueDataProvider(), lastTrace.getYformula(), RGBFactory.next(),
+                                lastTrace.getType(), lastTrace.getWidth(), lastTrace.getPointType(), lastTrace.getPointSize(), lastTrace.getYAxis());
+                        columns.get(addDefaultTraces.get()).getItems().add(newTrace);
+                    }
+                }
             }
             ScanServerItem scanServerItem = (ScanServerItem)(model.getTree().getValue());
             scanServerItem.getItems().setAll(FXCollections.observableArrayList(columns.values()));
