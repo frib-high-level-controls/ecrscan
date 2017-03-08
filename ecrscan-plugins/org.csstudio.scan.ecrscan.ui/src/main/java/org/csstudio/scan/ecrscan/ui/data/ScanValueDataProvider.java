@@ -95,8 +95,6 @@ public class ScanValueDataProvider implements PlotDataProvider<Double> {
         xequation.process("x = "+newxformulaString);
         yequation.process("y = "+newyformulaString);
 
-        System.out.println(x);
-        System.out.println(y);
         lock.writeLock().lock();
         try{
             x_data = new ArrayDouble(x.data);
