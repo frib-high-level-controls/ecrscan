@@ -29,6 +29,11 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  org.diirt.datasource-graphene;bundle-version="3.1.5",
  org.csstudio.javafx.rtplot;bundle-version="1.0.0",
  org.csstudio.display.builder.util;bundle-version="1.0.0"
-Export-Package: org.csstudio.scan.ecrscan.ui
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.csstudio.scan.ecrscan.ui.Activator
+Bundle-ClassPath: libs/core-0.30.jar,
+ libs/dense64-0.30.jar,
+ libs/denseC64-0.30.jar,
+ libs/equation-0.30.jar,
+ libs/simple-0.30.jar,
+ .

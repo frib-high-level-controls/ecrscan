@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-
 import static org.diirt.datasource.ExpressionLanguage.*;
 
 import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
@@ -32,11 +31,9 @@ import org.diirt.javafx.util.Executors;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -44,6 +41,7 @@ import javafx.scene.paint.Color;
 public class ScanController<T extends AbstractScanTreeItem<?>>  {
     
     private static Map<PVReader<Object>,Set<PVReaderListener<Object>>> pvReaderListeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Number,List<TraceItem>> traces = new ConcurrentHashMap<>();
     private ScanTreeTableEventHandler scanTreeTableEventHandler;
     final public static ExecutorService thread_pool = java.util.concurrent.Executors.newCachedThreadPool(new NamedThreadFactory("ScanJobs"));
     
@@ -97,7 +95,7 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
                         for(TraceItem readTrace:readTraces) {
                             if(readTrace.getData() instanceof ScanValueDataProvider) {
                                 ScanValueDataProvider scanValueDataProvider = (ScanValueDataProvider)readTrace.getData();
-                                thread_pool.execute(() -> scanValueDataProvider.setValue(readVTable,model.getXformula(),readTrace.getYformula()));
+                                thread_pool.execute(() -> scanValueDataProvider.setValue(readVTable));
                                 plot.requestUpdate();
                             }
                         }
@@ -107,7 +105,7 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
         };
     }
     
-    private final ConcurrentHashMap<Number,List<TraceItem>> traces = new ConcurrentHashMap<>();
+   
     
     // This gets called every update because I update the whole treetable model with new objects while a scan is running or paused. 
     private final class ScanTreeTableEventHandler implements EventHandler<TreeItem.TreeModificationEvent<AbstractScanTreeItem<?>>> {

@@ -2,7 +2,6 @@ package org.csstudio.scan.ecrscan.ui.controller;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,15 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     @FXML
     private void onChannelChanged(ActionEvent event) {
         model.setXformula(xformula.getText());
+        List<TreeItem<T>> treeItemsWithTraces = model.getTree().getChildren().stream().filter(treeItem -> !treeItem.getChildren().isEmpty()).collect(Collectors.toList());
+        for(TreeItem<T> treeItemsWithTrace:treeItemsWithTraces){
+            if(treeItemsWithTrace.getValue() instanceof TraceItem){
+                TraceItem traceItem = (TraceItem)treeItemsWithTrace.getValue();
+                treeItemsWithTrace.setValue((T) new TraceItem(new ScanValueDataProvider(model.getXformula(),traceItem.getYformula()), traceItem.getYformula(), traceItem.getColor(),
+                        traceItem.getType(), traceItem.getWidth(), traceItem.getPointType(), traceItem.getPointSize(), traceItem.getYAxis()));
+            }
+        }
+        
     }
     
     private ModelTreeTable<T> model;
@@ -273,7 +281,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 }
                 if (selectedItem.getValue() instanceof ScanItem) {
                     ScanItem scanItem = (ScanItem)selectedItem.getValue();
-                    TraceItem traceItem = new TraceItem(new ScanValueDataProvider(), yformula.getText(), RGBFactory.next(),
+                    TraceItem traceItem = new TraceItem(new ScanValueDataProvider(model.getXformula(),yformula.getText()), yformula.getText(), RGBFactory.next(),
                             TraceType.AREA, 1, PointType.NONE, 1, 0);
                     scanItem.getItems().add(traceItem);
                 }
@@ -513,7 +521,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 List<List<TraceItem>> lastTraces = scanTreeItems.stream().map(scanTreeItem -> scanTreeItem.getTraces()).collect(Collectors.toList());
                 if(lastTraces.size() > 0) {
                     for(TraceItem lastTrace:lastTraces.get(0)){
-                        TraceItem newTrace = new TraceItem(new ScanValueDataProvider(), lastTrace.getYformula(), RGBFactory.next(),
+                        TraceItem newTrace = new TraceItem(new ScanValueDataProvider(model.getXformula(),lastTrace.getYformula()), lastTrace.getYformula(), RGBFactory.next(),
                                 lastTrace.getType(), lastTrace.getWidth(), lastTrace.getPointType(), lastTrace.getPointSize(), lastTrace.getYAxis());
                         columns.get(addDefaultTraces.get()).getItems().add(newTrace);
                     }

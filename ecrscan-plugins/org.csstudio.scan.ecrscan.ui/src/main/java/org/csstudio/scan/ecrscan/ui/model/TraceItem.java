@@ -46,7 +46,7 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
                 pointSize,
                 yaxis,
                 FXCollections.emptyObservableList());
-        this.data = new ScanValueDataProvider();
+        this.data = new ScanValueDataProvider("0",yformula);
         this.units = units == null ? "" : units;
     }
     
