@@ -7,8 +7,8 @@ import org.csstudio.scan.ecrscan.ui.controller.ScanTreeTableController;
 import org.csstudio.scan.ecrscan.ui.controller.SidePanelController;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
-import org.csstudio.scan.ecrscan.ui.model.ScanServerItem;
-import javafx.css.PseudoClass;
+import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.ColumnConstraints;
@@ -23,6 +23,8 @@ public class Scan extends VBox {
     private final static FXMLLoader sidePanelLoader;
     private final static FXMLLoader dataColumnLoader;
     private final static GridPane root = new GridPane();
+    private final static Scene scene;
+    
     
     static {
         ColumnConstraints firstCol = new ColumnConstraints();
@@ -68,27 +70,11 @@ public class Scan extends VBox {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        scene = new Scene(root);
+        scene.getStylesheets().add(Scan.class.getResource("/styles/Styles.css").toExternalForm());
     }
 
-    public static Scene createScene() throws Exception {
-        ScanServerItem scanServerItem = new ScanServerItem("ecrscan");
-        ModelTreeTable<AbstractScanTreeItem<?>> model = new ModelTreeTable<AbstractScanTreeItem<?>>(
-                scanServerItem,
-                AbstractScanTreeItem::getItems,
-                AbstractScanTreeItem::nameProperty,
-                AbstractScanTreeItem::idProperty,
-                AbstractScanTreeItem::finishedProperty,
-                AbstractScanTreeItem::createdProperty,
-                AbstractScanTreeItem::percentProperty,
-                AbstractScanTreeItem::yformulaProperty,
-                AbstractScanTreeItem::colorProperty,
-                AbstractScanTreeItem::typeProperty,
-                AbstractScanTreeItem::widthProperty,
-                AbstractScanTreeItem::pointTypeProperty,
-                AbstractScanTreeItem::pointSizeProperty,
-                AbstractScanTreeItem::yaxisProperty,
-                item -> PseudoClass.getPseudoClass(item.getClass().getSimpleName().toLowerCase()));
-        
+    public static Scene createScene(ScanTreeModel inputModel, ModelTreeTable<AbstractScanTreeItem<?>> model) throws Exception {
         ScanController<AbstractScanTreeItem<?>> scanController = scanPlotLoader.getController();
         ScanTreeTableController<AbstractScanTreeItem<?>> scanTreeTableController = scanTreeTableLoader.getController();
         SidePanelController<AbstractScanTreeItem<?>> sidePanelController = sidePanelLoader.getController();
@@ -96,12 +82,9 @@ public class Scan extends VBox {
         
         scanController.initModel(model);
         scanTreeTableController.initModel(model);
-        sidePanelController.initModel(model);
+        sidePanelController.initModel(inputModel,model);
         dataColumnsController.initModel(model);
         
-        
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/Styles.css");
         return scene;
     }
     

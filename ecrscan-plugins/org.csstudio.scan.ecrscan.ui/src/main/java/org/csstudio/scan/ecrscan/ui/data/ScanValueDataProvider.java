@@ -36,6 +36,7 @@ public class ScanValueDataProvider implements PlotDataProvider<Double> {
     DenseMatrix64F y = new DenseMatrix64F(1,1);  // gets resized
     
     public ScanValueDataProvider(String xformula, String yformula){
+    	// Would like to compile formula, but VTable columns are not static
     	this.xformulaString = xformula;
     	this.yformulaString = yformula;
         xequation.alias(x, "x");

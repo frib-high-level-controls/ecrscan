@@ -28,7 +28,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  org.diirt.graphene;bundle-version="3.1.5",
  org.diirt.datasource-graphene;bundle-version="3.1.5",
  org.csstudio.javafx.rtplot;bundle-version="1.0.0",
- org.csstudio.display.builder.util;bundle-version="1.0.0"
+ org.csstudio.display.builder.util;bundle-version="1.0.0",
+ org.csstudio.scan
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.csstudio.scan.ecrscan.ui.Activator
 Bundle-ClassPath: libs/core-0.30.jar,

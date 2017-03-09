@@ -22,3 +22,12 @@
   -fx-text-box-border: green ;
   -fx-focus-color: green ;
 }
+
+.commandLabel {
+  -fx-font-weight: bold;
+  -fx-font-style: italic;
+}
+
+.propertyLabel {
+  -fx-padding: 0 0 0 20;
+}
