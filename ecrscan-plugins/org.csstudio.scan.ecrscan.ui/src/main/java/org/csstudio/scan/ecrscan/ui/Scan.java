@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
@@ -35,8 +36,8 @@ public class Scan extends VBox {
         
         ColumnConstraints secondCol = new ColumnConstraints();
         secondCol.setMaxWidth(Integer.MAX_VALUE);
-        secondCol.setMinWidth(150.0);
-        secondCol.setPrefWidth(150.0);
+        secondCol.setMinWidth(Region.USE_COMPUTED_SIZE);
+        secondCol.setPrefWidth(Region.USE_COMPUTED_SIZE);
         
         root.getColumnConstraints().add(firstCol);
         root.getColumnConstraints().add(secondCol);

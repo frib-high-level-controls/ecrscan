@@ -64,6 +64,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     private RGBFactory RGBFactory = new RGBFactory();
     private PV<?, Object> pvScanServer;
     AtomicBoolean atomicBoolean = new AtomicBoolean();
+    Map<String,Class<?>> columnMap = new LinkedHashMap<String,Class<?>>();
     
     @FXML
     private TreeTableView<T> treeTableView;
@@ -127,6 +128,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
 
     public void initModel(ModelTreeTable<T> model) {
         this.model = model;
+        treeTableView.getColumns().clear();
         treeTableView.setRoot(model.getTree());
         
         this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
@@ -143,8 +145,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                     .asynchWriteAndMaxReadRate(TimeDuration.ofHertz(10));
         });
         
-        
-        Map<String,Class<?>> columnMap = new LinkedHashMap<String,Class<?>>();
+        columnMap.clear();
         columnMap.put("name", String.class);
         columnMap.put("id", Number.class);
         columnMap.put("created", Instant.class);
@@ -505,6 +506,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 ScanItem scanItem = new ScanItem(vTable, n);
                 // if the first entry does not have a scan, and use default is selected, repeat the last traces
                 // Should probably do this at the end, instead of in a loop
+                // Shouldn't take the first entry, should find the "running" entry, repeat previous traces
                 if(!model.getTree().getChildren().isEmpty()) {
                     if(n==0 && useAsDefault.isSelected() == true && model.getTree().getChildren().get(0).getValue().getItems().isEmpty()) {
                         addDefaultTraces = Optional.of(scanItem.getId());

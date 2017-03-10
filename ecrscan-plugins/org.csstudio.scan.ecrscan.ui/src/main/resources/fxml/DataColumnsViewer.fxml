@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import org.csstudio.scan.ecrscan.ui.*?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
 
-
-<BorderPane fx:controller="org.csstudio.scan.ecrscan.ui.controller.DataColumnsController" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.csstudio.scan.ecrscan.ui.controller.DataColumnsController">
     <center>
-        <ListView fx:id="columnListView" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="171.0" />
+        <ListView fx:id="columnListView" minWidth="-Infinity" prefHeight="400.0" />
     </center>
 </BorderPane>

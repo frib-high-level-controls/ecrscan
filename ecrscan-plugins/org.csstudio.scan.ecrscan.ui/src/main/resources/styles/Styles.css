@@ -31,3 +31,7 @@
 .propertyLabel {
   -fx-padding: 0 0 0 20;
 }
+
+.editedPropertyValue {
+  -fx-background-color: gainsboro
+}
