@@ -92,10 +92,12 @@ public class Scan extends VBox {
     public static void closeConnections() {
         ScanController<AbstractScanTreeItem<?>> scanController = scanPlotLoader.getController();
         ScanTreeTableController<AbstractScanTreeItem<?>> scanTreeTableController = scanTreeTableLoader.getController();
+        SidePanelController<AbstractScanTreeItem<?>> sidePanelController = sidePanelLoader.getController();
         DataColumnsController<AbstractScanTreeItem<?>> dataColumnsController = dataColumnLoader.getController();
         
         scanController.closeConnections();
         scanTreeTableController.closeConnections();
+        sidePanelController.closeConnections();
         dataColumnsController.closeConnections();
     }
 }

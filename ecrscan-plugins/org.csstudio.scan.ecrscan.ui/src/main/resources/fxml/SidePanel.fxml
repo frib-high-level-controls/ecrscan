@@ -38,10 +38,10 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" text="Start" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                  <Button mnemonicParsing="false" text="Abort" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                  <Button mnemonicParsing="false" text="Pause" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                  <Button mnemonicParsing="false" text="Resume" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Button fx:id="start" mnemonicParsing="false" styleClass="windows7" text="Start" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Button fx:id="abort" mnemonicParsing="false" styleClass="windows7" text="Abort" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Button fx:id="pause" mnemonicParsing="false" styleClass="windows7" text="Pause" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Button fx:id="resume" mnemonicParsing="false" styleClass="windows7" text="Resume" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                </children>
             </GridPane>
             <ScrollPane hbarPolicy="NEVER" GridPane.rowIndex="2" GridPane.rowSpan="2147483647" GridPane.vgrow="ALWAYS">

@@ -13,6 +13,7 @@ import org.diirt.util.time.TimeDuration;
 import org.diirt.vtype.VTable;
 import org.diirt.vtype.table.VTableFactory;
 
+import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
@@ -60,37 +61,40 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
             }
         });
         
-        model.selectedScanProperty().addListener((observable, oldValue, newValue) -> {
-            String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
-            // Skip if it's the same channel
-            if (pvReader != null){
-                if (pvReader.getName().equals(channel)){
-                    return;
-                }
-            }
-            if (pvReader != null) {
-                pvReader.close();
-            }
-            pvReader = PVManager.read(channel(channel))
-                    .readListener((PVReaderEvent<Object> e) -> {
-                        Object readObject = e.getPvReader().getValue();
-                        if (readObject instanceof VTable) {
-                            VTable readVTable = (VTable)readObject;
-                            List<String> columnNames = VTableFactory.columnNames(readVTable);
-                            setItems(columnNames);
-                        }
-                    })
-                    .timeout(TimeDuration.ofSeconds(2), "Still connecting...")
-                    .notifyOn(Executors.javaFXAT())
-                    .maxRate(TimeDuration.ofHertz(10));
-        });
+        model.selectedScanProperty().addListener(listener);
         
     }
+    
+    private ChangeListener<? super T> listener = (observable, oldValue, newValue) -> {
+        String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
+        // Skip if it's the same channel
+        if (pvReader != null){
+            if (pvReader.getName().equals(channel)){
+                return;
+            }
+        }
+        if (pvReader != null) {
+            pvReader.close();
+        }
+        pvReader = PVManager.read(channel(channel))
+                .readListener((PVReaderEvent<Object> e) -> {
+                    Object readObject = e.getPvReader().getValue();
+                    if (readObject instanceof VTable) {
+                        VTable readVTable = (VTable)readObject;
+                        List<String> columnNames = VTableFactory.columnNames(readVTable);
+                        setItems(columnNames);
+                    }
+                })
+                .timeout(TimeDuration.ofSeconds(2), "Still connecting...")
+                .notifyOn(Executors.javaFXAT())
+                .maxRate(TimeDuration.ofHertz(10));
+    };
     
     public void closeConnections() {
         if (pvReader != null) {
             pvReader.close();
         }
+        model.selectedScanProperty().removeListener(listener);
     }
     
     private void setItems(List<String> columnNames) {

@@ -1,6 +1,12 @@
 package org.csstudio.scan.ecrscan.ui.controller;
 
+import static org.diirt.datasource.ExpressionLanguage.channel;
+
+import java.io.StringReader;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.csstudio.scan.command.ScanCommand;
 import org.csstudio.scan.command.ScanCommandProperty;
@@ -9,8 +15,16 @@ import org.csstudio.scan.command.XMLCommandWriter;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
 import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
+import org.diirt.datasource.PVManager;
+import org.diirt.datasource.PVWriterEvent;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.diirt.datasource.PVWriter;
+
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -22,10 +36,18 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
     private TextField channelField;
     @FXML
     private GridPane gridPane;
+    @FXML
+    private Button start;
+    @FXML
+    private Button abort;
+    @FXML
+    private Button pause;
+    @FXML
+    private Button resume;
     
     private ModelTreeTable<T> model;
     private ScanTreeModel inputModel;
-    private XMLCommandWriter xMLCommandWriter = new XMLCommandWriter();
+    private PVWriter<Object> pvWriter;
     
     public void initModel(ScanTreeModel inputModel, ModelTreeTable<T> model) {
         this.model = model;
@@ -34,17 +56,29 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
 
         createInputs(this.inputModel.getCommands());
         
-      /*  try {
-	        // on submit
-	        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
-	        DocumentBuilder builder = factory.newDocumentBuilder();  
-        
-			Document document = builder.parse( new InputSource( new StringReader( xMLCommandWriter.toXMLString(this.inputModel.getCommands()) ) ) );
-			//submit doc to pvmanager
-        } catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} */
+        model.selectedScanProperty().addListener(listener);
+
+        start.setOnAction((event) -> {
+        	try {
+	        	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
+		        DocumentBuilder builder = factory.newDocumentBuilder();  
+				Document document = builder.parse( new InputSource( new StringReader( XMLCommandWriter.toXMLString(this.inputModel.getCommands()))));
+				pvWriter.write(document);
+        	} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+        	
+        });
+        abort.setOnAction((event) -> {
+        	// needs to write to id, need to find running scans first
+        	pvWriter.write("abort");
+        });  
+        pause.setOnAction((event) -> {
+        	pvWriter.write("pause");
+        });
+        resume.setOnAction((event) -> {
+        	pvWriter.write("resume");
+        });
     }
     
     @FXML
@@ -104,5 +138,29 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
     			continue;
     		}
     	}
+    }
+    
+    private ChangeListener<? super T> listener = (observable, oldValue, newValue) -> {
+    	if (pvWriter != null) {
+            pvWriter.close();
+        }
+        String channel = model.getScanServer();
+        pvWriter = PVManager.write(channel(channel))
+                .writeListener((PVWriterEvent<Object> e) -> {
+                	if (e.isWriteSucceeded()) {
+                		System.out.println("Write finished");
+                	}
+                	if (e.isWriteFailed()) {
+                		System.out.println("Write failed");
+                	}
+                })
+                .async();
+    };
+    
+    public void closeConnections() {
+        if (pvWriter != null) {
+            pvWriter.close();
+        }
+        model.selectedScanProperty().removeListener(listener);
     }
 }
