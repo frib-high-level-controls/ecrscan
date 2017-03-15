@@ -10,12 +10,16 @@ import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
 import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
 
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class Scan extends VBox {
@@ -25,6 +29,7 @@ public class Scan extends VBox {
     private final static FXMLLoader dataColumnLoader;
     private final static GridPane root = new GridPane();
     private final static Scene scene;
+    
     
     
     static {
@@ -57,17 +62,17 @@ public class Scan extends VBox {
         root.getRowConstraints().add(secondRow);
         try {
             scanPlotLoader = new FXMLLoader(Scan.class.getResource("/fxml/Scan.fxml"));
-            root.add(scanPlotLoader.load(), 0, 0);
-            
             scanTreeTableLoader = new FXMLLoader(Scan.class.getResource("/fxml/ScanTreeTable.fxml"));
-            root.add(scanTreeTableLoader.load(), 0, 1);
+            SplitPane splitPane = new SplitPane(scanPlotLoader.load(),scanTreeTableLoader.load());
+            splitPane.setDividerPositions(0.90);
+            splitPane.setOrientation(Orientation.VERTICAL);
+            root.add(splitPane, 0, 0, 1, 2);
             
             sidePanelLoader = new FXMLLoader(Scan.class.getResource("/fxml/SidePanel.fxml"));
             root.add(sidePanelLoader.load(), 1, 0);
             
             dataColumnLoader = new FXMLLoader(Scan.class.getResource("/fxml/DataColumnsViewer.fxml"));
-            root.add(dataColumnLoader.load(), 1, 1);
-            
+            root.add(dataColumnLoader.load(), 1, 1);  
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

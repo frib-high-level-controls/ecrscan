@@ -17,11 +17,13 @@ public class ScanServerItem extends AbstractScanTreeItem<ScanItem> {
                 null,
                 null,
                 null,
+                null,
                 FXCollections.observableArrayList());
     }
     
     public ScanServerItem(String name, ObservableList<ScanItem> scans) {
         super(  name,
+                null,
                 null,
                 null,
                 null,

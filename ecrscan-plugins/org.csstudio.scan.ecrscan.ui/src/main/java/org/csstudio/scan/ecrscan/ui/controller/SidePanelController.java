@@ -4,6 +4,7 @@ import static org.diirt.datasource.ExpressionLanguage.channel;
 
 import java.io.StringReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,12 +22,12 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.diirt.datasource.PVWriter;
 
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 
@@ -47,7 +48,6 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
     
     private ModelTreeTable<T> model;
     private ScanTreeModel inputModel;
-    private PVWriter<Object> pvWriter;
     
     public void initModel(ScanTreeModel inputModel, ModelTreeTable<T> model) {
         this.model = model;
@@ -55,29 +55,95 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
         gridPane.getChildren().clear();
 
         createInputs(this.inputModel.getCommands());
-        
-        model.selectedScanProperty().addListener(listener);
 
         start.setOnAction((event) -> {
-        	try {
+			PVWriter<Object> pvSubmitWriter = PVManager.write(channel(model.getScanServer()))
+	                .writeListener((PVWriterEvent<Object> e) -> {
+	                	if (e.isWriteSucceeded()) {
+	                		//System.out.println("Write finished");
+	                	}
+	                	if (e.isWriteFailed()) {
+	                		//System.out.println("Write failed");
+	                	}
+	                })
+	                .sync();
+			try {
 	        	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
 		        DocumentBuilder builder = factory.newDocumentBuilder();  
 				Document document = builder.parse( new InputSource( new StringReader( XMLCommandWriter.toXMLString(this.inputModel.getCommands()))));
-				pvWriter.write(document);
+				pvSubmitWriter.write(document);
         	} catch (Exception e1) {
 				e1.printStackTrace();
+			} finally {
+				pvSubmitWriter.close();
 			}
-        	
         });
         abort.setOnAction((event) -> {
-        	// needs to write to id, need to find running scans first
-        	pvWriter.write("abort");
+        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+        		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running") ||
+        				treeItem.getValue().getStatus().equals("Paused"))
+        		.collect(Collectors.toList());
+        	for(TreeItem<T> runningScan:runningScans){
+        		Number id = runningScan.getValue().getId();
+        		if(id!=null){
+        			PVWriter<Object> pvAbortWriter = PVManager.write(channel(model.getScanServer()+"/"+String.valueOf(id.intValue())))
+        	                .writeListener((PVWriterEvent<Object> e) -> {
+        	                	if (e.isWriteSucceeded()) {
+        	                		//System.out.println("Write finished");
+        	                	}
+        	                	if (e.isWriteFailed()) {
+        	                		//System.out.println("Write failed");
+        	                	}
+        	                })
+        	                .sync();
+        			pvAbortWriter.write("abort");
+        			pvAbortWriter.close();
+        		}
+        	}
         });  
         pause.setOnAction((event) -> {
-        	pvWriter.write("pause");
+        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+            		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running"))
+            		.collect(Collectors.toList());
+            	for(TreeItem<T> runningScan:runningScans){
+            		Number id = runningScan.getValue().getId();
+            		if(id!=null){
+            			PVWriter<Object> pvPauseWriter = PVManager.write(channel(model.getScanServer()+"/"+String.valueOf(id.intValue())))
+            	                .writeListener((PVWriterEvent<Object> e) -> {
+            	                	if (e.isWriteSucceeded()) {
+            	                		//System.out.println("Write finished");
+            	                	}
+            	                	if (e.isWriteFailed()) {
+            	                		//System.out.println("Write failed");
+            	                	}
+            	                })
+            	                .sync();
+            			pvPauseWriter.write("pause");
+            			pvPauseWriter.close();
+            		}
+            	}
         });
         resume.setOnAction((event) -> {
-        	pvWriter.write("resume");
+        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+            		.filter(treeItem -> treeItem.getValue().getStatus().equals("Paused"))
+            		.collect(Collectors.toList());
+            	for(TreeItem<T> runningScan:runningScans){
+            		Number id = runningScan.getValue().getId();
+            		if(id!=null){
+            			PVWriter<Object> pvResumeWriter = PVManager.write(channel(model.getScanServer()+"/"+String.valueOf(id.intValue())))
+            	                .writeListener((PVWriterEvent<Object> e) -> {
+            	                	if (e.isWriteSucceeded()) {
+            	                		//System.out.println("Write finished");
+            	                	}
+            	                	if (e.isWriteFailed()) {
+            	                		//System.out.println("Write failed");
+            	                	}
+            	                })
+            	                .sync();
+            			pvResumeWriter.write("resume");
+            			pvResumeWriter.close();
+            		}
+            	}
         });
     }
     
@@ -140,27 +206,8 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
     	}
     }
     
-    private ChangeListener<? super T> listener = (observable, oldValue, newValue) -> {
-    	if (pvWriter != null) {
-            pvWriter.close();
-        }
-        String channel = model.getScanServer();
-        pvWriter = PVManager.write(channel(channel))
-                .writeListener((PVWriterEvent<Object> e) -> {
-                	if (e.isWriteSucceeded()) {
-                		System.out.println("Write finished");
-                	}
-                	if (e.isWriteFailed()) {
-                		System.out.println("Write failed");
-                	}
-                })
-                .async();
-    };
     
     public void closeConnections() {
-        if (pvWriter != null) {
-            pvWriter.close();
-        }
-        model.selectedScanProperty().removeListener(listener);
+
     }
 }

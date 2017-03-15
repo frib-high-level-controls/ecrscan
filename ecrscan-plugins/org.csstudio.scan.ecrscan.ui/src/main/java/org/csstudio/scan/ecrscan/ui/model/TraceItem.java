@@ -26,6 +26,7 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -39,6 +40,7 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
                 created,
                 percent,
                 yformula,
+                status,
                 color,
                 traceType,
                 traceWidth,
@@ -52,6 +54,7 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
     
     public TraceItem(final ScanValueDataProvider data, String yformula, Color color, TraceType traceType, Integer traceWidth, PointType pointType, Integer pointSize, Integer yaxis) {
         super( "trace",
+                null,
                 null,
                 null,
                 null,
@@ -74,6 +77,7 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,

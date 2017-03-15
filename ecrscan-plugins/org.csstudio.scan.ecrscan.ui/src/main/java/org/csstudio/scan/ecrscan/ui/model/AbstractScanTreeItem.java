@@ -24,6 +24,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     private final Property< Instant > finished = new SimpleObjectProperty< Instant >( this , "finished" );
     private final Property< Instant > created = new SimpleObjectProperty< Instant >( this , "created" );
     private final Property< Number > percent = new SimpleObjectProperty< Number >( this , "percent" );
+    private final StringProperty status = new SimpleStringProperty();
     
     private final StringProperty yformula = new SimpleStringProperty();
     private final Property< Color > color = new SimpleObjectProperty< Color >( this , "color" );
@@ -33,12 +34,12 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     private final Property< Integer > pointSize = new SimpleObjectProperty< Integer >( this , "pointSize" );
     private final Property< Integer > yaxis = new SimpleObjectProperty< Integer >( this , "yaxis" );
 
-    private final Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction;
+    private final Function13<String, Number, Instant, Instant, Number, String, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction;
     private final ObservableList<T> items;
     
     @FunctionalInterface
-    interface Function12<One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Eleven, Twelve, Thirteen> {
-        public Thirteen apply(One one, Two two, Three three, Four four, Five five, Six six, Seven seven, Eight eight, Nine nine, Ten ten, Eleven eleven, Twelve twelve);
+    interface Function13<One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Eleven, Twelve, Thirteen, Fourteen> {
+        public Fourteen apply(One one, Two two, Three three, Four four, Five five, Six six, Seven seven, Eight eight, Nine nine, Ten ten, Eleven eleven, Twelve twelve, Thirteen thirteen);
     }
     
 
@@ -48,6 +49,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -55,7 +57,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             PointType pointType,
             Integer pointSize,
             Integer yaxis,
-            ObservableList<T> items, Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction) {
+            ObservableList<T> items, Function13<String, Number, Instant, Instant, Number, String, String, Color, TraceType, Integer, PointType, Integer, Integer, T> itemFunction) {
         this.items = items;
         this.itemFunction = itemFunction;
         setName(name);
@@ -63,6 +65,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
         setFinished(finished);
         setCreated(created);
         setPercent(percent);
+        setStatus(status);
         
         setYformula(yformula);
         setColor(color);
@@ -80,6 +83,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -94,6 +98,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
+                status,
                 yformula,
                 color,
                 traceType,
@@ -101,7 +106,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 pointType,
                 pointSize,
                 yaxis,
-                items, (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve) -> null);
+                items, (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve, thirteen) -> null);
     }
     
 
@@ -111,6 +116,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -118,13 +124,14 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             PointType pointType,
             Integer pointSize,
             Integer yaxis,
-            Function12<String, Number, Instant, Instant, Number, String, Color, TraceType, Integer, PointType, Integer, Integer, T>  itemFunction) {
+            Function13<String, Number, Instant, Instant, Number, String, String, Color, TraceType, Integer, PointType, Integer, Integer, T>  itemFunction) {
         this(
                 name,
                 id,
                 finished,
                 created,
                 percent,
+                status,
                 yformula,
                 color,
                 traceType,
@@ -142,6 +149,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -155,6 +163,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
+                status,
                 yformula,
                 color,
                 traceType,
@@ -162,7 +171,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 pointType,
                 pointSize,
                 yaxis,
-                FXCollections.observableArrayList(), (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve) -> null);
+                FXCollections.observableArrayList(), (one, two, three, four, five, six, seven, eight, nine, ten, eleven, tweleve, thirteen) -> null);
     }
     
 
@@ -178,6 +187,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -191,6 +201,7 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
                 finished,
                 created,
                 percent,
+                status,
                 yformula,
                 color,
                 traceType,
@@ -296,7 +307,22 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     }
     
 
+	public final StringProperty statusProperty() {
+		return this.status;
+	}
+	
 
+	public final java.lang.String getStatus() {
+		return this.statusProperty().get();
+	}
+	
+
+
+	public final void setStatus(final java.lang.String status) {
+		this.statusProperty().set(status);
+	}
+    
+    
     public final java.lang.String getYformula() {
         return this.yformulaProperty().get();
     }
@@ -414,9 +440,4 @@ public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
     public final void setYAxis(final Integer yaxis) {
         this.yaxisProperty().setValue(yaxis);
     }
-    
-
-
-
-    
 }

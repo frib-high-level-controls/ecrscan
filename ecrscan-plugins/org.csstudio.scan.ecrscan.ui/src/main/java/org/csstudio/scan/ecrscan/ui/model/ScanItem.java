@@ -20,6 +20,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
             Instant finished,
             Instant created,
             Number percent,
+            String status,
             String yformula,
             Color color,
             TraceType traceType,
@@ -32,6 +33,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
                 finished,
                 created,
                 percent,
+                status,
                 yformula,
                 color,
                 traceType,
@@ -49,6 +51,7 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
                 getFinished(vTable,columnIndex),
                 getCreated(vTable,columnIndex),
                 getPercent(vTable,columnIndex),
+                getStatus(vTable,columnIndex),
                 null,
                 null,
                 null,
@@ -100,6 +103,15 @@ public class ScanItem extends AbstractScanTreeItem<TraceItem>{
             return (Number)((List<?>) data).get(columnIndex);
         } else {
             return 0;
+        }
+    }
+    
+    private static String getStatus(VTable vTable, int columnIndex) {
+        Object data = vTable.getColumnData(6);
+        if (data instanceof List) {
+            return (String)((List<?>) data).get(columnIndex);
+        } else {
+            return "";
         }
     }
 }
