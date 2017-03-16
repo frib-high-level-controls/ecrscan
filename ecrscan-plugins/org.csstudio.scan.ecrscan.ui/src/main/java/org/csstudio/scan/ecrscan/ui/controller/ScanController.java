@@ -31,6 +31,7 @@ import org.diirt.javafx.util.Executors;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
@@ -57,9 +58,11 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
         this.model = model;
         plot.getXAxis().setName("");
         plot.getYAxes().get(0).setName("");
+        plot.getYAxes().get(0).setExponentialThreshold(2);
         plot.getXAxis().setAutoscale(true);
         plot.getYAxes().get(0).setAutoscale(true);
         plot.getXAxis().setGridVisible(true);
+        traces.clear();
         
         if(scanTreeTableEventHandler!=null){
             model.getTree().removeEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);

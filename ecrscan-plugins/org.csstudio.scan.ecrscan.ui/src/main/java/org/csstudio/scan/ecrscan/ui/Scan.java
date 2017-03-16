@@ -86,9 +86,10 @@ public class Scan extends VBox {
         SidePanelController<AbstractScanTreeItem<?>> sidePanelController = sidePanelLoader.getController();
         DataColumnsController<AbstractScanTreeItem<?>> dataColumnsController = dataColumnLoader.getController();
         
+        // order matters here
+        sidePanelController.initModel(inputModel,model);
         scanController.initModel(model);
         scanTreeTableController.initModel(model);
-        sidePanelController.initModel(inputModel,model);
         dataColumnsController.initModel(model);
         
         return scene;

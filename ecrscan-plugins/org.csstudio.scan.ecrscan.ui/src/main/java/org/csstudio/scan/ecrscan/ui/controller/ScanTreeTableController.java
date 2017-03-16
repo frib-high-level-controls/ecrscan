@@ -130,6 +130,8 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         this.model = model;
         treeTableView.getColumns().clear();
         treeTableView.setRoot(model.getTree());
+        model.setXformula("");
+        model.setXformula(xformula.getText());
         
         this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
             if (pvScanServer != null) {

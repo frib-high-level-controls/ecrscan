@@ -53,6 +53,8 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
         this.model = model;
         this.inputModel = inputModel;
         gridPane.getChildren().clear();
+        model.setScanServer("");
+        model.setScanServer(channelField.getText());
 
         createInputs(this.inputModel.getCommands());
 
