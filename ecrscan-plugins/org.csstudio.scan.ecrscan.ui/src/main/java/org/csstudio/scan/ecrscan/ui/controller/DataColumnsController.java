@@ -4,7 +4,7 @@ import static org.diirt.datasource.ExpressionLanguage.channel;
 
 import java.util.List;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
-import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.diirt.datasource.PVManager;
 import org.diirt.datasource.PVReader;
 import org.diirt.datasource.PVReaderEvent;
@@ -28,15 +28,15 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
     @FXML
     private ListView<String> columnListView;
     
-    private ModelTreeTable<T> model;
+    private ScanModel<T> model;
     private static PVReader<Object> pvReader;
-    
+    private ChangeListener<? super T> listener;
     public DataColumnsController() {
         
         
     }
     
-    public void initModel(ModelTreeTable<T> model) {
+    public void initModel(ScanModel<T> model) {
         this.model = model;
         columnListView.setOnDragDetected(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
@@ -61,40 +61,44 @@ public class DataColumnsController<T extends AbstractScanTreeItem<?>> {
             }
         });
         
+        if (listener!=null) {
+        	model.selectedScanProperty().removeListener(listener);
+        }
+        
+        listener = (observable, oldValue, newValue) -> {
+            String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
+            // Skip if it's the same channel
+            if (pvReader != null){
+                if (pvReader.getName().equals(channel)){
+                    return;
+                }
+            }
+            if (pvReader != null) {
+                pvReader.close();
+            }
+            pvReader = PVManager.read(channel(channel))
+                    .readListener((PVReaderEvent<Object> e) -> {
+                        Object readObject = e.getPvReader().getValue();
+                        if (readObject instanceof VTable) {
+                            VTable readVTable = (VTable)readObject;
+                            List<String> columnNames = VTableFactory.columnNames(readVTable);
+                            setItems(columnNames);
+                        }
+                    })
+                    .timeout(TimeDuration.ofSeconds(2), "Still connecting...")
+                    .notifyOn(Executors.javaFXAT())
+                    .maxRate(TimeDuration.ofHertz(10));
+        };
+        
         model.selectedScanProperty().addListener(listener);
         
     }
-    
-    private ChangeListener<? super T> listener = (observable, oldValue, newValue) -> {
-        String channel = model.getScanServer()+"/"+String.valueOf(newValue.getId())+"/data";
-        // Skip if it's the same channel
-        if (pvReader != null){
-            if (pvReader.getName().equals(channel)){
-                return;
-            }
-        }
-        if (pvReader != null) {
-            pvReader.close();
-        }
-        pvReader = PVManager.read(channel(channel))
-                .readListener((PVReaderEvent<Object> e) -> {
-                    Object readObject = e.getPvReader().getValue();
-                    if (readObject instanceof VTable) {
-                        VTable readVTable = (VTable)readObject;
-                        List<String> columnNames = VTableFactory.columnNames(readVTable);
-                        setItems(columnNames);
-                    }
-                })
-                .timeout(TimeDuration.ofSeconds(2), "Still connecting...")
-                .notifyOn(Executors.javaFXAT())
-                .maxRate(TimeDuration.ofHertz(10));
-    };
     
     public void closeConnections() {
         if (pvReader != null) {
             pvReader.close();
         }
-        model.selectedScanProperty().removeListener(listener);
+        //model.selectedScanProperty().removeListener(listener);
     }
     
     private void setItems(List<String> columnNames) {

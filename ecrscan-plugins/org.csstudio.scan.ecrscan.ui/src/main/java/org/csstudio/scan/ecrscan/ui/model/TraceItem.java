@@ -48,13 +48,13 @@ public class TraceItem extends AbstractScanTreeItem<AbstractScanTreeItem<?>> {
                 pointSize,
                 yaxis,
                 FXCollections.emptyObservableList());
-        this.data = new ScanValueDataProvider("0",yformula);
+        this.data = new ScanValueDataProvider("","0",yformula);
         this.units = units == null ? "" : units;
     }
     
-    public TraceItem(final ScanValueDataProvider data, String yformula, Color color, TraceType traceType, Integer traceWidth, PointType pointType, Integer pointSize, Integer yaxis) {
+    public TraceItem(Number id, final ScanValueDataProvider data, String yformula, Color color, TraceType traceType, Integer traceWidth, PointType pointType, Integer pointSize, Integer yaxis) {
         super( "trace",
-                null,
+                id,
                 null,
                 null,
                 null,

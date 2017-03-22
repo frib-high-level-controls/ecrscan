@@ -11,14 +11,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
 import org.csstudio.javafx.rtplot.util.RGBFactory;
+import org.csstudio.scan.ecrscan.ui.data.AbstractValueDataProvider;
 import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
 import org.csstudio.scan.ecrscan.ui.model.ScanItem;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.csstudio.scan.ecrscan.ui.model.ScanServerItem;
 import org.csstudio.scan.ecrscan.ui.model.TraceItem;
 import org.diirt.datasource.PV;
@@ -63,8 +64,12 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
 
     private RGBFactory RGBFactory = new RGBFactory();
     private PV<?, Object> pvScanServer;
-    AtomicBoolean atomicBoolean = new AtomicBoolean();
-    Map<String,Class<?>> columnMap = new LinkedHashMap<String,Class<?>>();
+    private AtomicBoolean atomicBoolean = new AtomicBoolean();
+    private Map<String,Class<?>> columnMap = new LinkedHashMap<String,Class<?>>();
+    private ScanModel<T> model;
+    private ModelTreeTable<T> tree;
+    private final static ScanServerItem scanServerItem = new ScanServerItem("ecrscan");
+    private ListListener listListener;
     
     @FXML
     private TreeTableView<T> treeTableView;
@@ -81,19 +86,18 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     @FXML
     private void onChannelChanged(ActionEvent event) {
         model.setXformula(xformula.getText());
-        List<TreeItem<T>> treeItemsWithTraces = model.getTree().getChildren().stream().filter(treeItem -> !treeItem.getChildren().isEmpty()).collect(Collectors.toList());
-        for(TreeItem<T> treeItemsWithTrace:treeItemsWithTraces){
-            if(treeItemsWithTrace.getValue() instanceof TraceItem){
-                TraceItem traceItem = (TraceItem)treeItemsWithTrace.getValue();
-                treeItemsWithTrace.setValue((T) new TraceItem(new ScanValueDataProvider(model.getXformula(),traceItem.getYformula()), traceItem.getYformula(), traceItem.getColor(),
-                        traceItem.getType(), traceItem.getWidth(), traceItem.getPointType(), traceItem.getPointSize(), traceItem.getYAxis()));
-            }
-        }
         
+        Optional<ObservableList<TraceItem>> optList = Optional.ofNullable(model.getDataStore().get(scanServerItem.getName()));
+        if(optList.isPresent()){
+        	optList.get().forEach(trace ->{
+	        	((AbstractValueDataProvider)trace.getData()).close();
+	        	String channel = model.getScanServer()+"/"+String.valueOf(trace.getId().intValue())+"/data";
+	        	trace = new TraceItem(trace.getId(), new ScanValueDataProvider(channel, model.getXformula(),trace.getYformula()), trace.getYformula(), trace.getColor(),
+	        			trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis());
+	        });
+        }
     }
     
-    private ModelTreeTable<T> model;
-
     public ScanTreeTableController() {
         
         
@@ -125,13 +129,40 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 }
         }
     }
+    private final class ListListener implements ListChangeListener<TraceItem> {
+		@Override
+		public void onChanged(javafx.collections.ListChangeListener.Change<? extends TraceItem> c) {
+            while(c.next()) {
+				if(c.wasAdded()){
+					for(TraceItem trace: c.getAddedSubList()) {
+						 Optional<TreeItem<T>> treeItemOpt = getTreeItem(trace.getId());
+						 treeItemOpt.ifPresent(t -> ((ScanItem)t.getValue()).getItems().add(trace));
+					}
+				}
+				if(c.wasRemoved()){
+					for (TraceItem trace: c.getRemoved()){
+						Optional<TreeItem<T>> treeItemOpt = getTreeItem(trace.getId());
+						 treeItemOpt.ifPresent(t -> t.getValue().getItems().remove(trace));
+					}
+				}
+            }
+		}
+    }
 
-    public void initModel(ModelTreeTable<T> model) {
+    public void initModel(ScanModel<T> model, ModelTreeTable<T> tree ) {
         this.model = model;
+        this.tree = tree;
         treeTableView.getColumns().clear();
-        treeTableView.setRoot(model.getTree());
+        treeTableView.setRoot(tree.getTree());
         model.setXformula("");
         model.setXformula(xformula.getText());
+        Optional<ObservableList<TraceItem>> optList = Optional.ofNullable(model.getDataStore().get(scanServerItem.getName()));
+        
+        if(listListener != null){
+        	optList.ifPresent(l -> l.removeListener(listListener));
+        }
+        listListener = new ListListener();
+        optList.ifPresent(l -> l.addListener(listListener));
         
         this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
             if (pvScanServer != null) {
@@ -278,15 +309,17 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 return ;
             }
             final List<TreeItem<T>> selectedItems = treeTableView.getSelectionModel().getSelectedItems();
+            
             for (TreeItem<T> selectedItem : selectedItems){
                 if (selectedItem.getValue() instanceof TraceItem) {
                     return;
                 }
-                if (selectedItem.getValue() instanceof ScanItem) {
+                if (selectedItem.getValue() instanceof ScanItem && optList.isPresent()) {
                     ScanItem scanItem = (ScanItem)selectedItem.getValue();
-                    TraceItem traceItem = new TraceItem(new ScanValueDataProvider(model.getXformula(),yformula.getText()), yformula.getText(), RGBFactory.next(),
+                    String channel = model.getScanServer()+"/"+String.valueOf(scanItem.getId().intValue())+"/data";
+                    TraceItem traceItem = new TraceItem(scanItem.getId(), new ScanValueDataProvider(channel,model.getXformula(),yformula.getText()), yformula.getText(), RGBFactory.next(),
                             TraceType.AREA, 1, PointType.NONE, 1, 0);
-                    scanItem.getItems().add(traceItem);
+                    optList.get().add(traceItem);
                 }
             }
         };
@@ -302,7 +335,9 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
             ScanItem scanItem = (ScanItem)selected.getParent().getValue();
             // work around because parent is lost, and I need to know which parent this trace was deleted from
             selected.getValue().setId(scanItem.getId());
-            selected.getParent().getValue().getItems().remove(selected.getValue());
+            TraceItem traceItem = (TraceItem)selected.getValue();
+            ((AbstractValueDataProvider)traceItem.getData()).close();
+            model.getDataStore().get(scanServerItem.getName()).remove(selected.getValue());
             // fire trace change
         });
         
@@ -433,15 +468,13 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     private class ScanTreeItem {
         private final Number scanId;
         private final Boolean isExpanded;
-        private final List<TraceItem> traces;
         /**
          * @param isExpanded
          * @param traces
          */
-        public ScanTreeItem(Number scanId, Boolean isExpanded, List<TraceItem> traces) {
+        public ScanTreeItem(Number scanId, Boolean isExpanded) {
             this.scanId = scanId;
             this.isExpanded = isExpanded;
-            this.traces = traces;
         }
         /**
          * @return the scanId
@@ -454,13 +487,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
          */
         public Boolean isExpanded() {
             return isExpanded;
-        }
-        /**
-         * @return the traces
-         */
-        public List<TraceItem> getTraces() {
-            return traces;
-        }  
+        } 
     }
 
     private static <T> BinaryOperator<T> toOnlyElement() {
@@ -475,65 +502,64 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     }
     
     private Optional<TreeItem<T>> getTreeItem(Number scanId) {
-        return model.getTree().getChildren().stream().filter(treeItem -> treeItem.getValue().getId().equals(scanId)).reduce(toOnlyElement());
+        return tree.getTree().getChildren().stream().filter(treeItem -> treeItem.getValue().getId().equals(scanId)).reduce(toOnlyElement());
     }
     
     private void fillTreeTable(Object value, boolean connection) {
-        // get traces and scan ids of traces
-        // set new scans, add traces back  ???
-        // This is way too expensive
-        // 
-        // Resetting all the data seems to mess up the selector
-        // I could put a lock with the selector or
-        // I could add/modify/delete only changes to the model
+
         if (value instanceof org.diirt.vtype.VTable) {
+        	// save expanded state
             List<ScanTreeItem> scanTreeItems = new ArrayList<>();
             ObservableList<TreeItem<T>> scanlist = treeTableView.getRoot().getChildren();
             for (TreeItem<T> item:scanlist) {
                 if ( item.getValue() instanceof ScanItem) {
                     ScanItem scanItem = (ScanItem)item.getValue();
-                    List<TraceItem> traceList = new ArrayList<TraceItem>();
-                    for(TraceItem traceItem:scanItem.getItems()){
-                        traceList.add(traceItem);
-                    }
-                    if (!traceList.isEmpty()) {
-                        scanTreeItems.add(new ScanTreeItem(scanItem.getId(),item.isExpanded(),traceList));
+                    if (!scanItem.getItems().isEmpty()) {
+                        scanTreeItems.add(new ScanTreeItem(scanItem.getId(),item.isExpanded()));
                     }
                 }
             }
+            // load vtable into tree with model scans
             VTable vTable = (VTable) value;
             LinkedHashMap<Number, ScanItem> columns = new LinkedHashMap<Number,ScanItem>();
-            Optional<Number> addDefaultTraces = Optional.empty();
+            Optional<ObservableList<TraceItem>> optList = Optional.ofNullable(model.getDataStore().get(scanServerItem.getName()));
             for (int n = 0; n < getSize(vTable,0); n++) {
                 ScanItem scanItem = new ScanItem(vTable, n);
-                // if the first entry does not have a scan, and use default is selected, repeat the last traces
-                // Should probably do this at the end, instead of in a loop
-                // Shouldn't take the first entry, should find the "running" entry, repeat previous traces
-                if(!model.getTree().getChildren().isEmpty()) {
-                    if(n==0 && useAsDefault.isSelected() == true && model.getTree().getChildren().get(0).getValue().getItems().isEmpty()) {
-                        addDefaultTraces = Optional.of(scanItem.getId());
-                    }
+                // would be faster as a map
+                if (optList.isPresent()){
+	                List<TraceItem> traces = optList.get()
+	        		.stream()
+	        		.filter(trace -> trace.getId().equals(scanItem.getId()))
+	        		.collect(Collectors.toList());
+	                scanItem.getItems().setAll(traces);
                 }
                 columns.put(scanItem.getId(),scanItem);
             }
-            for (ScanTreeItem scanTreeItem:scanTreeItems) {
-                if(columns.get(scanTreeItem.getScanId()) != null){
-                    columns.get(scanTreeItem.getScanId()).getItems().setAll(scanTreeItem.getTraces());
-                }
-            }
-            if (addDefaultTraces.isPresent()){
-                List<List<TraceItem>> lastTraces = scanTreeItems.stream().map(scanTreeItem -> scanTreeItem.getTraces()).collect(Collectors.toList());
-                if(lastTraces.size() > 0) {
-                    for(TraceItem lastTrace:lastTraces.get(0)){
-                        TraceItem newTrace = new TraceItem(new ScanValueDataProvider(model.getXformula(),lastTrace.getYformula()), lastTrace.getYformula(), RGBFactory.next(),
-                                lastTrace.getType(), lastTrace.getWidth(), lastTrace.getPointType(), lastTrace.getPointSize(), lastTrace.getYAxis());
-                        columns.get(addDefaultTraces.get()).getItems().add(newTrace);
-                    }
-                }
+            
+            // if useAsDefault selected, load traces from sibling scan on new running scan
+            if (useAsDefault.isSelected()){
+            	List<TreeItem<T>> runningScans = tree.getTree().getChildren().stream()
+                		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running"))
+                		.collect(Collectors.toList());
+            	for(TreeItem<T> runningScan:runningScans){
+            		if(runningScan.getChildren().isEmpty() && runningScan.getValue() instanceof ScanItem){
+            			ScanItem scanItem = (ScanItem)runningScan.getValue();
+            			for(TreeItem<T> siblingTrace : runningScan.nextSibling().getChildren()){
+            				if(siblingTrace.getValue() instanceof TraceItem){
+            					String channel = model.getScanServer()+"/"+String.valueOf(scanItem.getId().intValue())+"/data";
+            					TraceItem traceItem = (TraceItem)siblingTrace.getValue();
+            					TraceItem newTrace = new TraceItem(scanItem.getId(),new ScanValueDataProvider(channel, model.getXformula(),traceItem.getYformula()), traceItem.getYformula(), RGBFactory.next(),
+            							traceItem.getType(), traceItem.getWidth(), traceItem.getPointType(), traceItem.getPointSize(), traceItem.getYAxis());
+            					columns.get(scanItem.getId()).getItems().add(newTrace);
+            					model.getDataStore().get(scanServerItem.getName()).add(newTrace);
+            				}
+            			}
+            		}
+            	}
             }
             // Get previous selection, selection resets to the first item after refilling items
             int selectionId = treeTableView.getSelectionModel().getSelectedIndex();
-            ScanServerItem scanServerItem = (ScanServerItem)(model.getTree().getValue());
+            ScanServerItem scanServerItem = (ScanServerItem)(tree.getTree().getValue());
             // The treetable selector needs to be disabled during fill items, because it selects every item as added
             atomicBoolean.set(true);
             scanServerItem.getItems().setAll(FXCollections.observableArrayList(columns.values()));

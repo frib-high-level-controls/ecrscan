@@ -9,8 +9,6 @@ import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.TraceType;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
@@ -21,9 +19,7 @@ import javafx.scene.paint.Color;
 public class ModelTreeTable<T> {
     
     private final Function<T, ObservableList<? extends T>> children ;
-    private final StringProperty scanServer = new SimpleStringProperty( this , "", null);
-    private final StringProperty xformula = new SimpleStringProperty( this , "", null);
-    private final ObjectProperty<T> selectedScan = new SimpleObjectProperty<>(null);
+
     private final ObjectProperty<TreeItem<T>> tree = new SimpleObjectProperty<>(null);
     
     public ModelTreeTable(T rootItem, Function<T, ObservableList<? extends T>> children, 
@@ -85,57 +81,11 @@ public class ModelTreeTable<T> {
         return item ;
     }
 
-    public final StringProperty scanServerProperty() {
-        return this.scanServer;
-    }
-    
-
-    public final java.lang.String getScanServer() {
-        return this.scanServerProperty().get();
-    }
-    
-
-    public final void setScanServer(final java.lang.String scanServer) {
-        this.scanServerProperty().set(scanServer);
-    }
-
-    public final ObjectProperty<T> selectedScanProperty() {
-        return this.selectedScan;
-    }
-    
-
-    public final T getSelectedScan() {
-        return this.selectedScanProperty().get();
-    }
-    
-
-    public final void setSelectedScan(final T selectedScan) {
-        this.selectedScanProperty().set(selectedScan);
-    }
-
     public final ObjectProperty<TreeItem<T>> treeProperty() {
         return this.tree;
     }
-    
 
     public final javafx.scene.control.TreeItem<T> getTree() {
         return this.treeProperty().get();
-    }
-
-    public final StringProperty xformulaProperty() {
-        return this.xformula;
-    }
-    
-
-    public final java.lang.String getXformula() {
-        return this.xformulaProperty().get();
-    }
-    
-
-    public final void setXformula(final java.lang.String xformula) {
-        this.xformulaProperty().set(xformula);
-    }
-    
-    
-    
+    }   
 }
