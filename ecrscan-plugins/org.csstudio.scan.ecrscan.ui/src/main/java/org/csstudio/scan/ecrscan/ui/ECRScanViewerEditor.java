@@ -17,8 +17,10 @@ import org.csstudio.scan.command.ScanCommandFactory;
 import org.csstudio.scan.command.XMLCommandReader;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.csstudio.scan.ecrscan.ui.model.ScanServerItem;
 import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
+import org.csstudio.scan.ecrscan.ui.model.TraceItem;
 import org.csstudio.ui.fx.util.FXEditorPart;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,6 +33,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
+import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -42,7 +45,8 @@ public class ECRScanViewerEditor extends FXEditorPart implements IShellProvider 
     public static final String ID = "org.csstudio.scan.ecrscan.ui.editor.viewer";
     private final static ScanTreeModel inputModel = new ScanTreeModel();
     private final static ScanServerItem scanServerItem = new ScanServerItem("ecrscan");
-    private final static ModelTreeTable<AbstractScanTreeItem<?>> model = new ModelTreeTable<AbstractScanTreeItem<?>>(
+    private final static ScanModel<AbstractScanTreeItem<?>> model = new ScanModel<AbstractScanTreeItem<?>>();
+    private final static ModelTreeTable<AbstractScanTreeItem<?>> tree = new ModelTreeTable<AbstractScanTreeItem<?>>(
             scanServerItem,
             AbstractScanTreeItem::getItems,
             AbstractScanTreeItem::nameProperty,
@@ -58,6 +62,10 @@ public class ECRScanViewerEditor extends FXEditorPart implements IShellProvider 
             AbstractScanTreeItem::pointSizeProperty,
             AbstractScanTreeItem::yaxisProperty,
             item -> PseudoClass.getPseudoClass(item.getClass().getSimpleName().toLowerCase()));
+    
+    static {
+        model.getDataStore().put(scanServerItem.getName(), FXCollections.observableArrayList());
+    }
 
     /**
      * Constructs a new editor.
@@ -164,7 +172,7 @@ public class ECRScanViewerEditor extends FXEditorPart implements IShellProvider 
     @Override
     protected Scene createFxScene() {
         try {
-            return Scan.createScene(inputModel, model);
+            return Scan.createScene(inputModel, model, tree);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

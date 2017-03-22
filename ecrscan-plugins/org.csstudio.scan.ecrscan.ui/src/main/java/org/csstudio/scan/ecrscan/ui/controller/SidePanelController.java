@@ -15,6 +15,7 @@ import org.csstudio.scan.command.UnknownScanCommandPropertyException;
 import org.csstudio.scan.command.XMLCommandWriter;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
 import org.diirt.datasource.PVManager;
 import org.diirt.datasource.PVWriterEvent;
@@ -46,10 +47,10 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
     @FXML
     private Button resume;
     
-    private ModelTreeTable<T> model;
+    private ScanModel<T> model;
     private ScanTreeModel inputModel;
     
-    public void initModel(ScanTreeModel inputModel, ModelTreeTable<T> model) {
+    public void initModel(ScanTreeModel inputModel, ScanModel<T> model, ModelTreeTable<T> tree) {
         this.model = model;
         this.inputModel = inputModel;
         gridPane.getChildren().clear();
@@ -81,7 +82,7 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
 			}
         });
         abort.setOnAction((event) -> {
-        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+        	List<TreeItem<T>> runningScans = tree.getTree().getChildren().stream()
         		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running") ||
         				treeItem.getValue().getStatus().equals("Paused"))
         		.collect(Collectors.toList());
@@ -104,7 +105,7 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
         	}
         });  
         pause.setOnAction((event) -> {
-        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+        	List<TreeItem<T>> runningScans = tree.getTree().getChildren().stream()
             		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running"))
             		.collect(Collectors.toList());
             	for(TreeItem<T> runningScan:runningScans){
@@ -126,7 +127,7 @@ public class SidePanelController<T extends AbstractScanTreeItem<?>> {
             	}
         });
         resume.setOnAction((event) -> {
-        	List<TreeItem<T>> runningScans = model.getTree().getChildren().stream()
+        	List<TreeItem<T>> runningScans = tree.getTree().getChildren().stream()
             		.filter(treeItem -> treeItem.getValue().getStatus().equals("Paused"))
             		.collect(Collectors.toList());
             	for(TreeItem<T> runningScan:runningScans){

@@ -1,60 +1,36 @@
 package org.csstudio.scan.ecrscan.ui.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import static org.diirt.datasource.ExpressionLanguage.*;
 
-import org.csstudio.scan.ecrscan.ui.data.ScanValueDataProvider;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
-import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
-import org.csstudio.scan.ecrscan.ui.model.ScanItem;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.csstudio.scan.ecrscan.ui.model.TraceItem;
 import org.csstudio.javafx.rtplot.PointType;
 import org.csstudio.javafx.rtplot.RTScanPlot;
 import org.csstudio.javafx.rtplot.Trace;
 import org.csstudio.javafx.rtplot.TraceType;
-import org.csstudio.javafx.rtplot.util.NamedThreadFactory;
-import org.diirt.datasource.PVManager;
-import org.diirt.datasource.PVReader;
-import org.diirt.datasource.PVReaderEvent;
-import org.diirt.datasource.PVReaderListener;
-import org.diirt.util.time.TimeDuration;
-import org.diirt.vtype.VTable;
-import org.diirt.javafx.util.Executors;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeItem.TreeModificationEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
 public class ScanController<T extends AbstractScanTreeItem<?>>  {
     
-    private static Map<PVReader<Object>,Set<PVReaderListener<Object>>> pvReaderListeners = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Number,List<TraceItem>> traces = new ConcurrentHashMap<>();
-    private ScanTreeTableEventHandler scanTreeTableEventHandler;
-    final public static ExecutorService thread_pool = java.util.concurrent.Executors.newCachedThreadPool(new NamedThreadFactory("ScanJobs"));
-    
-    @FXML
-    private GridPane rootPane;
+    private MapListener mapListener;
+    private ConcurrentHashMap<String,ListListener> listListeners = new ConcurrentHashMap<String,ListListener>();
+    private ConcurrentHashMap<TraceItem,Trace<Double>> traceMap = new ConcurrentHashMap<TraceItem,Trace<Double>>();
 
     @FXML
     private RTScanPlot plot;
     
-    private ModelTreeTable<T> model;
+    private ScanModel<T> model;
     
-    public void initModel(ModelTreeTable<T> model) {
+    public void initModel(ScanModel<T> model) {
         this.model = model;
         plot.getXAxis().setName("");
         plot.getYAxes().get(0).setName("");
@@ -62,103 +38,73 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
         plot.getXAxis().setAutoscale(true);
         plot.getYAxes().get(0).setAutoscale(true);
         plot.getXAxis().setGridVisible(true);
-        traces.clear();
         
-        if(scanTreeTableEventHandler!=null){
-            model.getTree().removeEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
+		if(mapListener!=null){
+            model.getDataStore().removeListener(mapListener);
         }
-        scanTreeTableEventHandler = new ScanTreeTableEventHandler();
-        model.getTree().addEventHandler(TreeItem.childrenModificationEvent(),scanTreeTableEventHandler);
+		for(Entry<String, ObservableList<TraceItem>> map : model.getDataStore().entrySet()){
+			ScanController<T>.ListListener listener = new ListListener();
+			listListeners.put(map.getKey(), listener);
+			map.getValue().addListener(listener);
+		}
+		mapListener = new MapListener();
+        model.getDataStore().addListener(mapListener);
         model.xformulaProperty().addListener((observable, oldValue, newValue) ->{
             plot.getXAxis().setName(newValue);
         });
     }
     
     public void closeConnections() {
-        for (Entry<PVReader<Object>, Set<PVReaderListener<Object>>> pv:pvReaderListeners.entrySet()) {
-            if (pv.getKey()!=null) {
-                pv.getKey().close();
-            }
-        }
-        pvReaderListeners.clear();
-    }
-   
-    
-    private PVReaderListener<Object> createReadListener() {
-        return new PVReaderListener<Object>() {
 
-            @Override
-            public void pvChanged(PVReaderEvent<Object> e) {
-                Object readObject = e.getPvReader().getValue();
-                if (readObject instanceof VTable) {
-                    VTable readVTable = (VTable)readObject; 
-                    String readerScanId = e.getPvReader().getName().replaceAll("[^0-9]", "");
-                    List<TraceItem> readTraces = traces.get(Integer.parseInt(readerScanId));
-                    if(readTraces != null) {
-                        for(TraceItem readTrace:readTraces) {
-                            if(readTrace.getData() instanceof ScanValueDataProvider) {
-                                ScanValueDataProvider scanValueDataProvider = (ScanValueDataProvider)readTrace.getData();
-                                thread_pool.execute(() -> scanValueDataProvider.setValue(readVTable));
-                                plot.requestUpdate();
-                            }
-                        }
-                    }
-                }
-            }
-        };
     }
     
-   
-    
-    // This gets called every update because I update the whole treetable model with new objects while a scan is running or paused. 
-    private final class ScanTreeTableEventHandler implements EventHandler<TreeItem.TreeModificationEvent<AbstractScanTreeItem<?>>> {
-        @Override
-        public void handle(TreeModificationEvent<AbstractScanTreeItem<?>> event) {
-            Map<Number,List<TraceItem>> newTraces = new HashMap<>();
-            List<?> scanlist = model.getTree().getValue().getItems();
-            for (Object item:scanlist) {
-                if ( item instanceof ScanItem) {
-                    ScanItem scanItem = (ScanItem)item;
-                    List<TraceItem> traceList = new ArrayList<TraceItem>();
-                    for(TraceItem traceItem:scanItem.getItems()){
-                        traceList.add(traceItem);
-                    }
-                    if (!traceList.isEmpty()) {
-                        newTraces.put(scanItem.getId(), traceList);
-                    }
-                }
-            }
-            if(!newTraces.equals(traces)){
-                traces.clear();
-                traces.putAll(newTraces);
-                closeConnections();
-                for(Trace<Double> trace : plot.getTraces()){
-                    plot.removeTrace(trace);
-                }
-                for (Entry<Number, List<TraceItem>> scan:traces.entrySet()) {
-                    for(TraceItem trace:scan.getValue()) {
-                        Trace<Double> plotTrace = plot.addTrace(String.valueOf(scan.getKey())+":"+trace.getYformula(), trace.getUnits(), trace.getData(), trace.getColor(), trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis());
-                        trace.colorProperty().addListener(new ColorChangeListener(plotTrace));
-                        trace.pointSizeProperty().addListener(new PointSizeChangeListener(plotTrace));
-                        trace.typeProperty().addListener(new TypeChangeListener(plotTrace));
-                        trace.widthProperty().addListener(new WidthChangeListener(plotTrace));
-                        trace.pointTypeProperty().addListener(new PointTypeChangeListener(plotTrace));
-                    }
-                    PVReaderListener<Object> listener = createReadListener();
-                    Set<PVReaderListener<Object>> listeners = new HashSet<PVReaderListener<Object>>();
-                    listeners.add(listener);
-                    String channel = model.getScanServer()+"/"+scan.getKey().toString()+"/data";
-                    PVReader<Object> reader = PVManager.read(channel(channel))
-                      .readListener(listener)
-                      .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
-                      .notifyOn(Executors.javaFXAT())
-                      .maxRate(TimeDuration.ofHertz(10));
-                    pvReaderListeners.put(reader, listeners); 
-                }
-                plot.requestUpdate();
-            }
-        }    
+    private final class MapListener implements MapChangeListener<String,ObservableList<TraceItem>> {
+		@Override
+		public void onChanged(
+				javafx.collections.MapChangeListener.Change<? extends String, ? extends ObservableList<TraceItem>> change) {
+			
+			if(change.getValueAdded()!=null){
+				ScanController<T>.ListListener listener = new ListListener();
+				listListeners.put(change.getKey(), listener);
+				change.getValueAdded().addListener(listener);
+			}
+			if(change.getValueRemoved()!=null){
+				change.getValueRemoved().removeListener(listListeners.get(change.getKey()));
+				listListeners.remove(change.getKey());
+			}
+		}
     }
+    
+    private final class ListListener implements ListChangeListener<TraceItem> {
+		@Override
+		public void onChanged(javafx.collections.ListChangeListener.Change<? extends TraceItem> c) {
+            while (c.next()) {
+				if(c.wasAdded()){
+					for(TraceItem trace: c.getAddedSubList()) {
+						Trace<Double> plotTrace = plot.addTrace(String.valueOf(trace.getId())+":"+trace.getYformula(), trace.getUnits(), trace.getData(), trace.getColor(), trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis());
+	                    trace.colorProperty().addListener(new ColorChangeListener(plotTrace));
+	                    trace.pointSizeProperty().addListener(new PointSizeChangeListener(plotTrace));
+	                    trace.typeProperty().addListener(new TypeChangeListener(plotTrace));
+	                    trace.widthProperty().addListener(new WidthChangeListener(plotTrace));
+	                    trace.pointTypeProperty().addListener(new PointTypeChangeListener(plotTrace));
+	                    if (trace.getData() instanceof Observable){
+	                    	Observable observable =(Observable)trace.getData();
+	                    	observable.addObserver((o, arg) -> {plot.requestUpdate();});
+	                    }
+	                    traceMap.put(trace, plotTrace);
+					}
+				}
+				if(c.wasRemoved()){
+					for (TraceItem trace: c.getRemoved()){
+						plot.removeTrace(traceMap.get(trace));
+						traceMap.remove(trace);
+					}
+				}
+				plot.requestUpdate();
+            }
+		}
+    }
+    
     private final class PointTypeChangeListener implements ChangeListener<PointType> {
         private final Trace<Double> plotTrace;
         public PointTypeChangeListener(final Trace<Double> plotTrace) {

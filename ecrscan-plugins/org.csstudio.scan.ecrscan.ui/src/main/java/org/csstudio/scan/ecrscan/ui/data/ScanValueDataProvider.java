@@ -1,7 +1,10 @@
 package org.csstudio.scan.ecrscan.ui.data;
 
+import static org.diirt.datasource.ExpressionLanguage.channel;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.Observable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -9,19 +12,23 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.csstudio.javafx.rtplot.data.PlotDataItem;
-import org.csstudio.javafx.rtplot.data.PlotDataProvider;
 import org.csstudio.javafx.rtplot.data.SimpleDataItem;
+import org.diirt.datasource.PVManager;
+import org.diirt.datasource.PVReader;
+import org.diirt.datasource.PVReaderEvent;
+import org.diirt.javafx.util.Executors;
 import org.diirt.util.array.ArrayDouble;
 import org.diirt.util.array.IteratorNumber;
 import org.diirt.util.array.ListNumber;
+import org.diirt.util.time.TimeDuration;
 import org.diirt.vtype.VNumberArray;
 import org.diirt.vtype.VTable;
 import org.diirt.vtype.table.VTableFactory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.equation.Equation;
-import org.ejml.equation.Sequence;
 
-public class ScanValueDataProvider implements PlotDataProvider<Double> {
+
+public class ScanValueDataProvider extends Observable implements AbstractValueDataProvider {
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private volatile ListNumber x_data, y_data;
@@ -30,17 +37,36 @@ public class ScanValueDataProvider implements PlotDataProvider<Double> {
     private final Equation yequation = new Equation();
     private final String xformulaString;
     private final String yformulaString;
-    private  Sequence xformula;
-    private  Sequence yformula;
+/*    private  Sequence xformula;
+    private  Sequence yformula;*/
     DenseMatrix64F x = new DenseMatrix64F(1,1);  // gets resized
     DenseMatrix64F y = new DenseMatrix64F(1,1);  // gets resized
+    PVReader<Object> reader;
     
-    public ScanValueDataProvider(String xformula, String yformula){
+    public ScanValueDataProvider(String channel, String xformula, String yformula){
     	// Would like to compile formula, but VTable columns are not static
     	this.xformulaString = xformula;
     	this.yformulaString = yformula;
         xequation.alias(x, "x");
         yequation.alias(y, "y");
+        reader = PVManager.read(channel(channel))
+                .readListener((PVReaderEvent<Object> e) -> {
+                    Object readObject = e.getPvReader().getValue();
+                    if (readObject instanceof VTable) {
+                        VTable readVTable = (VTable)readObject;
+                        setValue(readVTable);
+                        setChanged();
+                        this.notifyObservers();
+                    }
+                })
+                .timeout(TimeDuration.ofSeconds(1), "Still connecting...")
+                .notifyOn(Executors.javaFXAT())
+                .maxRate(TimeDuration.ofHertz(10));
+    }
+    
+    @Override
+    public void close() {
+    	reader.close();
     }
     
     /** {@inheritDoc} */
@@ -61,7 +87,7 @@ public class ScanValueDataProvider implements PlotDataProvider<Double> {
      *  @param value New value
      *  Fires event to listeners (plot)
      */
-    public void setValue(final VTable value) {
+    private void setValue(final VTable value) {
         if (value==null) return;
         
         List<String> columnNames = VTableFactory.columnNames(value);
@@ -86,8 +112,10 @@ public class ScanValueDataProvider implements PlotDataProvider<Double> {
             Iterator<Double> iteratorNumberDouble = new IteratorNumberDouble(new_x.iterator());
             Iterable<Double> iterable = () -> iteratorNumberDouble;
             Stream<Double> targetStream = StreamSupport.stream(iterable.spliterator(), false);
+            // faster to just iterate
             double[] data = targetStream.mapToDouble(d -> d.doubleValue()).toArray();
             DenseMatrix64F denseMatrix64F = new DenseMatrix64F(new_x.size(),1,true,data);
+            // This will not always work
             xequation.alias(denseMatrix64F, "x"+String.valueOf(xcolumnIndex));
             yequation.alias(denseMatrix64F, "x"+String.valueOf(xcolumnIndex));
             newxformulaString = newxformulaString.replace(columnName, "x"+String.valueOf(xcolumnIndex));

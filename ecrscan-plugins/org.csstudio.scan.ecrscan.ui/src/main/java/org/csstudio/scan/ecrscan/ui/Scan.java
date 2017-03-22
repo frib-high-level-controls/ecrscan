@@ -7,19 +7,18 @@ import org.csstudio.scan.ecrscan.ui.controller.ScanTreeTableController;
 import org.csstudio.scan.ecrscan.ui.controller.SidePanelController;
 import org.csstudio.scan.ecrscan.ui.model.AbstractScanTreeItem;
 import org.csstudio.scan.ecrscan.ui.model.ModelTreeTable;
+import org.csstudio.scan.ecrscan.ui.model.ScanModel;
 import org.csstudio.scan.ecrscan.ui.model.ScanTreeModel;
 
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class Scan extends VBox {
@@ -80,16 +79,16 @@ public class Scan extends VBox {
         scene.getStylesheets().add(Scan.class.getResource("/styles/Styles.css").toExternalForm());
     }
 
-    public static Scene createScene(ScanTreeModel inputModel, ModelTreeTable<AbstractScanTreeItem<?>> model) throws Exception {
+    public static Scene createScene(ScanTreeModel inputModel, ScanModel<AbstractScanTreeItem<?>> model, ModelTreeTable<AbstractScanTreeItem<?>> tree ) throws Exception {
         ScanController<AbstractScanTreeItem<?>> scanController = scanPlotLoader.getController();
         ScanTreeTableController<AbstractScanTreeItem<?>> scanTreeTableController = scanTreeTableLoader.getController();
         SidePanelController<AbstractScanTreeItem<?>> sidePanelController = sidePanelLoader.getController();
         DataColumnsController<AbstractScanTreeItem<?>> dataColumnsController = dataColumnLoader.getController();
         
         // order matters here
-        sidePanelController.initModel(inputModel,model);
+        sidePanelController.initModel(inputModel,model, tree);
         scanController.initModel(model);
-        scanTreeTableController.initModel(model);
+        scanTreeTableController.initModel(model, tree);
         dataColumnsController.initModel(model);
         
         return scene;
