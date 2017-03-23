@@ -105,6 +105,11 @@
 			<url>http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.version}/repository/</url>
 			<layout>p2</layout>
 		</repository>
+		<repository>
+			<id>displaybuilder</id>
+			<url>https://ics-web.sns.ornl.gov/css/display.builder/</url>
+			<layout>p2</layout>
+		</repository>
 	</repositories>
 
 	<!-- CHILD MODULES -->
