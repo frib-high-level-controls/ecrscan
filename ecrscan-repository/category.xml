@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+
+   <feature id="org.csstudio.scan.ecrscan.feature.source">
+      <category name="FRIB Features"/>
+   </feature>
+   <feature id="org.csstudio.scan.ecrscan.feature">
+      <category name="FRIB Features"/>
+   </feature>
+
+   <category-def name="FRIB Features" label="FRIB Features"/>
+
+</site>

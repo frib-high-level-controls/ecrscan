@@ -10,5 +10,5 @@
   <packaging>pom</packaging>
   <modules>
     <module>org.csstudio.scan.ecrscan.feature</module>
-  </modules>
+  </modules> 
 </project>
