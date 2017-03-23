@@ -11,12 +11,12 @@
   <parent>
     <groupId>org.csstudio</groupId>
     <artifactId>ecrscan</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.csstudio</groupId>
   <artifactId>ecrscan-repository</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
   <build>
