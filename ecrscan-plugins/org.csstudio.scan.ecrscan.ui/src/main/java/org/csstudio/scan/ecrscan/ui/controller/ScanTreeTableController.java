@@ -92,8 +92,9 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         	optList.get().forEach(trace ->{
 	        	((AbstractValueDataProvider)trace.getData()).close();
 	        	String channel = model.getScanServer()+"/"+String.valueOf(trace.getId().intValue())+"/data";
-	        	trace = new TraceItem(trace.getId(), new ScanValueDataProvider(channel, model.getXformula(),trace.getYformula()), trace.getYformula(), trace.getColor(),
-	        			trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis());
+	        	int i = optList.get().indexOf(trace);
+	        	optList.get().set(i, new TraceItem(trace.getId(), new ScanValueDataProvider(channel, model.getXformula(),trace.getYformula()), trace.getYformula(), trace.getColor(),
+	        			trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis()));
 	        });
         }
     }
@@ -163,6 +164,16 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         }
         listListener = new ListListener();
         optList.ifPresent(l -> l.addListener(listListener));
+        
+        if(optList.isPresent()){
+        	optList.get().forEach(trace ->{
+	        	((AbstractValueDataProvider)trace.getData()).close();
+	        	String channel = model.getScanServer()+"/"+String.valueOf(trace.getId().intValue())+"/data";
+	        	int i = optList.get().indexOf(trace);
+	        	optList.get().set(i, new TraceItem(trace.getId(), new ScanValueDataProvider(channel, model.getXformula(),trace.getYformula()), trace.getYformula(), trace.getColor(),
+	        			trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis()));
+	        });
+        }
         
         this.model.scanServerProperty().addListener((observable, oldValue, newValue) ->{
             if (pvScanServer != null) {
@@ -452,6 +463,8 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
         if (pvScanServer != null) {
             pvScanServer.close();
         }
+        Optional<ObservableList<TraceItem>> optList = Optional.ofNullable(model.getDataStore().get(scanServerItem.getName()));
+        optList.ifPresent(tlist -> tlist.stream().forEach(t ->((AbstractValueDataProvider)t.getData()).close()));
     }
     
     private int getSize(VTable vTable, int column){

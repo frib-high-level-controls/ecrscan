@@ -79,6 +79,12 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
 		@Override
 		public void onChanged(javafx.collections.ListChangeListener.Change<? extends TraceItem> c) {
             while (c.next()) {
+            	if(c.wasRemoved()){
+					for (TraceItem trace: c.getRemoved()){
+						plot.removeTrace(traceMap.get(trace));
+						traceMap.remove(trace);
+					}
+				}
 				if(c.wasAdded()){
 					for(TraceItem trace: c.getAddedSubList()) {
 						Trace<Double> plotTrace = plot.addTrace(String.valueOf(trace.getId())+":"+trace.getYformula(), trace.getUnits(), trace.getData(), trace.getColor(), trace.getType(), trace.getWidth(), trace.getPointType(), trace.getPointSize(), trace.getYAxis());
@@ -92,12 +98,6 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
 	                    	observable.addObserver((o, arg) -> {plot.requestUpdate();});
 	                    }
 	                    traceMap.put(trace, plotTrace);
-					}
-				}
-				if(c.wasRemoved()){
-					for (TraceItem trace: c.getRemoved()){
-						plot.removeTrace(traceMap.get(trace));
-						traceMap.remove(trace);
 					}
 				}
 				plot.requestUpdate();
