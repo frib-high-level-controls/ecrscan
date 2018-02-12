@@ -7,7 +7,6 @@
 	<classpathentry exported="true" kind="lib" path="libs/denseC64-0.30.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/equation-0.30.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/simple-0.30.jar"/>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" path="src/main/java/"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

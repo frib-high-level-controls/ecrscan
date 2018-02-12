@@ -6,6 +6,7 @@ Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: FRIB
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javafx.beans.property,
+ javafx.css;version="8.0.0",
  javafx.event;version="2.2.0",
  javafx.scene,
  javafx.scene.control,
@@ -15,6 +16,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  org.eclipse.core.runtime;bundle-version="3.11.0",
  org.eclipse.ui.ide;bundle-version="3.11.0",
  org.eclipse.core.resources;bundle-version="3.10.1",
+ org.eclipse.fx.javafx,
  org.csstudio.ui.fx.util;bundle-version="1.0.0",
  org.csstudio.ui.util,
  org.csstudio.csdata;bundle-version="3.1.0",
@@ -29,7 +31,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  org.diirt.datasource-graphene;bundle-version="3.1.5",
  org.csstudio.javafx.rtplot;bundle-version="1.0.0",
  org.csstudio.display.builder.util;bundle-version="1.0.0",
- org.csstudio.scan
+ org.csstudio.scan,
+ org.csstudio.javafx;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.csstudio.scan.ecrscan.ui.Activator
 Bundle-ClassPath: libs/core-0.30.jar,

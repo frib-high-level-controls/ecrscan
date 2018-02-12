@@ -16,12 +16,12 @@
 	<!-- PROPERTIES -->
 	<properties>
 		<!-- VERSIONS -->
-		<tycho.version>0.23.1</tycho.version>
-		<tycho-extras.version>0.23.1</tycho-extras.version>
-        <eclipse.release>mars</eclipse.release>
-        <eclipse.version>4.5</eclipse.version>
-        <orbit.version>R20160221192158</orbit.version>
-        <cs-studio.version>4.4</cs-studio.version>
+		<tycho.version>1.0.0</tycho.version>
+		<tycho-extras.version>1.0.0</tycho-extras.version>
+        <eclipse.release>neon</eclipse.release>
+        <eclipse.version>4.6</eclipse.version>
+        <orbit.version>R20170307180635</orbit.version>
+        <cs-studio.version>4.5</cs-studio.version>
 		<cs-studio-central.url>http://controls.frib.msu.edu/css/features/ecrscan/${cs-studio.version}</cs-studio-central.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
@@ -53,20 +53,20 @@
       <url>http://p2.nscl.msu.edu:8080/maven/ecrscan-snapshot-${cs-studio.version}</url>
     </snapshotRepository>
     </distributionManagement>
-  
+
 	<!-- Profiles -->
 	<profiles>
 		<profile>
-			<id>csstudio-local-repo-enable</id>
+			<id>csstudio-composite-repo-enable</id>
 			<activation>
-        		<file>
-          			<exists>${csstudio.local.repo}/artifacts.jar</exists>
-        		</file>
-      		</activation>
+				<property>
+					<name>csstudio.composite.repo</name>
+				</property>
+			</activation>
 			<repositories>
 				<repository>
-					<id>csstudio-local-repo</id>
-					<url>file:${csstudio.local.repo}</url>
+					<id>csstudio-composite-repo</id>
+					<url>file:${csstudio.composite.repo}</url>
 					<layout>p2</layout>
 				</repository>
 			</repositories>
@@ -82,35 +82,52 @@
 			<pluginRepositories>
 			</pluginRepositories>
 		</profile>
+		<profile>
+			<id>cs-studio</id>
+			<activation>
+				<property>
+					<name>!cs-studio</name>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>csstudio-updates</id>
+					<url>http://download.controlsystemstudio.org/updates/${cs-studio.version}</url>
+					<layout>p2</layout>
+				</repository>
+				<repository>
+					<id>displaybuilder</id>
+					<url>https://ics-web.sns.ornl.gov/css/display.builder/</url>
+					<layout>p2</layout>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>eclipse-sites</id>
+			<activation>
+				<property>
+					<name>!eclipse</name>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>eclipse</id>
+					<url>http://download.eclipse.org/releases/${eclipse.release}</url>
+					<layout>p2</layout>
+				</repository>
+				<repository>
+					<id>eclipse-updates</id>
+					<url>http://download.eclipse.org/eclipse/updates/${eclipse.version}</url>
+					<layout>p2</layout>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<url>http://download.eclipse.org/tools/orbit/R-builds/${orbit.version}/repository</url>
+					<layout>p2</layout>
+				</repository>
+			</repositories>
+		</profile>
 	</profiles>
-
-	<repositories>
-		<repository>
-			<id>csstudio-updates</id>
-			<url>http://download.controlsystemstudio.org/updates/${cs-studio.version}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>eclipse</id>
-			<url>http://download.eclipse.org/releases/${eclipse.release}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>eclipse-updates</id>
-			<url>http://download.eclipse.org/eclipse/updates/${eclipse.version}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>orbit</id>
-			<url>http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.version}/repository/</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>displaybuilder</id>
-			<url>https://ics-web.sns.ornl.gov/css/display.builder/</url>
-			<layout>p2</layout>
-		</repository>
-	</repositories>
 
 	<!-- CHILD MODULES -->
 	<modules>

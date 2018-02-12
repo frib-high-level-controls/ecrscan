@@ -49,6 +49,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.ComboBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
@@ -520,6 +521,11 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
     
     private void fillTreeTable(Object value, boolean connection) {
 
+        TreeTablePosition<T, ?> currentEditingCell = treeTableView.getEditingCell();
+        // don't fill tree if items are being edited
+        if (currentEditingCell != null) {
+            return;
+        }
         if (value instanceof org.diirt.vtype.VTable) {
         	// save expanded state
             List<ScanTreeItem> scanTreeItems = new ArrayList<>();
@@ -555,7 +561,7 @@ public class ScanTreeTableController<T extends AbstractScanTreeItem<?>> {
                 		.filter(treeItem -> treeItem.getValue().getStatus().equals("Running"))
                 		.collect(Collectors.toList());
             	for(TreeItem<T> runningScan:runningScans){
-            		if(runningScan.getChildren().isEmpty() && runningScan.getValue() instanceof ScanItem){
+            		if(runningScan.getChildren().isEmpty() && runningScan.getValue() instanceof ScanItem && runningScan.nextSibling() != null){
             			ScanItem scanItem = (ScanItem)runningScan.getValue();
             			for(TreeItem<T> siblingTrace : runningScan.nextSibling().getChildren()){
             				if(siblingTrace.getValue() instanceof TraceItem){

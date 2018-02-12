@@ -22,6 +22,7 @@ import javafx.scene.paint.Color;
 public class ScanController<T extends AbstractScanTreeItem<?>>  {
     
     private MapListener mapListener;
+    private ChangeListener<? super String> xformulaChangelListener;
     private ConcurrentHashMap<String,ListListener> listListeners = new ConcurrentHashMap<String,ListListener>();
     private ConcurrentHashMap<TraceItem,Trace<Double>> traceMap = new ConcurrentHashMap<TraceItem,Trace<Double>>();
 
@@ -38,24 +39,33 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
         plot.getXAxis().setAutoscale(true);
         plot.getYAxes().get(0).setAutoscale(true);
         plot.getXAxis().setGridVisible(true);
-        
-		if(mapListener!=null){
+
+        if (mapListener != null) {
             model.getDataStore().removeListener(mapListener);
         }
-		for(Entry<String, ObservableList<TraceItem>> map : model.getDataStore().entrySet()){
-			ScanController<T>.ListListener listener = new ListListener();
-			listListeners.put(map.getKey(), listener);
-			map.getValue().addListener(listener);
-		}
-		mapListener = new MapListener();
+        for (Entry<String, ObservableList<TraceItem>> map : model.getDataStore().entrySet()) {
+            ScanController<T>.ListListener listener = new ListListener();
+            listListeners.put(map.getKey(), listener);
+            map.getValue().addListener(listener);
+        }
+        mapListener = new MapListener();
         model.getDataStore().addListener(mapListener);
-        model.xformulaProperty().addListener((observable, oldValue, newValue) ->{
-            plot.getXAxis().setName(newValue);
-        });
+        if (xformulaChangelListener != null) {
+            model.xformulaProperty().removeListener(xformulaChangelListener);
+        } else {
+            xformulaChangelListener = (observable, oldValue, newValue) -> {
+                plot.getXAxis().setName(newValue);
+            };
+            model.xformulaProperty().addListener(xformulaChangelListener);
+        }  
     }
     
     public void closeConnections() {
-
+        model.getDataStore().removeListener(mapListener);
+        model.xformulaProperty().removeListener(xformulaChangelListener);
+        for (Entry<String, ScanController<T>.ListListener> listListener : listListeners.entrySet()) {;
+            model.getDataStore().get(listListener.getKey()).removeListener(listListener.getValue());
+        }
     }
     
     private final class MapListener implements MapChangeListener<String,ObservableList<TraceItem>> {
@@ -81,8 +91,10 @@ public class ScanController<T extends AbstractScanTreeItem<?>>  {
             while (c.next()) {
             	if(c.wasRemoved()){
 					for (TraceItem trace: c.getRemoved()){
-						plot.removeTrace(traceMap.get(trace));
-						traceMap.remove(trace);
+					    if(traceMap.get(trace) != null ){
+					        plot.removeTrace(traceMap.get(trace));
+					        traceMap.remove(trace);
+					    }
 					}
 				}
 				if(c.wasAdded()){
