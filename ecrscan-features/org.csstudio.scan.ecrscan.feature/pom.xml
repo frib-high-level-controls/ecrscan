@@ -4,10 +4,10 @@
   <parent>
     <groupId>org.csstudio</groupId>
     <artifactId>ecrscan-features</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
   </parent>
   <artifactId>org.csstudio.scan.ecrscan.feature</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
   <build>
     <plugins>
