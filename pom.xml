@@ -16,12 +16,12 @@
 	<!-- PROPERTIES -->
 	<properties>
 		<!-- VERSIONS -->
-		<tycho.version>1.0.0</tycho.version>
-		<tycho-extras.version>1.0.0</tycho-extras.version>
-        <eclipse.release>neon</eclipse.release>
-        <eclipse.version>4.6</eclipse.version>
-        <orbit.version>R20170307180635</orbit.version>
-        <cs-studio.version>4.5</cs-studio.version>
+		<tycho.version>1.1.0</tycho.version>
+		<tycho-extras.version>1.1.0</tycho-extras.version>
+		<eclipse.release>neon</eclipse.release>
+		<eclipse.version>4.6</eclipse.version>
+		<orbit.version>R20170307180635</orbit.version>
+		<cs-studio.version>4.5</cs-studio.version>
 		<cs-studio-central.url>http://controls.frib.msu.edu/css/features/ecrscan/${cs-studio.version}</cs-studio-central.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
@@ -42,17 +42,23 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-    <!-- DEPLOY / RELEASE -->
-    <distributionManagement>
-    <repository>
-      <id>controls</id>
-      <url>http://p2.nscl.msu.edu:8080/maven/ecrscan-release-${cs-studio.version}</url>
-    </repository>
-    <snapshotRepository>
-      <id>controls</id>
-      <url>http://p2.nscl.msu.edu:8080/maven/ecrscan-snapshot-${cs-studio.version}</url>
-    </snapshotRepository>
-    </distributionManagement>
+	<!-- GIT REPO -->
+	<scm>
+		<connection>scm:git:https://github.com/frib-high-level-controls/ecrscan.git</connection>
+		<developerConnection>scm:git:https://github.com/frib-high-level-controls/ecrscan.git</developerConnection>
+	</scm>
+
+	<!-- DEPLOY / RELEASE -->
+	<distributionManagement>
+		<repository>
+			<id>controls</id>
+			<url>http://p2.nscl.msu.edu:8080/maven/ecrscan-release-${cs-studio.version}</url>
+		</repository>
+		<snapshotRepository>
+			<id>controls</id>
+			<url>http://p2.nscl.msu.edu:8080/maven/ecrscan-snapshot-${cs-studio.version}</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<!-- Profiles -->
 	<profiles>
@@ -182,6 +188,57 @@
 
 		<!-- PLUGIN CONFIGURATION -->
 		<plugins>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-release-plugin</artifactId>
+		<version>2.5.3</version>
+		<configuration>
+			<preparationGoals>org.eclipse.tycho:tycho-versions-plugin:${tycho-version}:update-eclipse-metadata
+				org.apache.maven.plugins:maven-scm-plugin:1.9.5:add
+				org.apache.maven.plugins:maven-scm-plugin:1.9.5:checkin</preparationGoals>
+			<completionGoals>org.eclipse.tycho:tycho-versions-plugin:${tycho-version}:update-eclipse-metadata
+				org.apache.maven.plugins:maven-scm-plugin:1.9.5:add
+				org.apache.maven.plugins:maven-scm-plugin:1.9.5:checkin</completionGoals>
+		</configuration>
+	</plugin>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-scm-plugin</artifactId>
+		<executions>
+			<execution>
+				<id>default-cli</id>
+				<goals>
+					<goal>add</goal>
+					<goal>checkin</goal>
+				</goals>
+				<configuration>
+					<includes>**/META-INF/MANIFEST.MF,**/feature.xml,**/*.product</includes>
+					<excludes>**/target/**</excludes>
+					<message>Changing the version to reflect the pom versions for the
+						release</message>
+				</configuration>
+			</execution>
+		</executions>
+	</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-cli</id>
+						<goals>
+							<goal>add</goal>
+							<goal>checkin</goal>
+						</goals>
+						<configuration>
+							<includes>**/META-INF/MANIFEST.MF,**/feature.xml,**/*.product</includes>
+							<excludes>**/target/**</excludes>
+							<message>Changing the version to reflect the pom versions for the
+								release</message>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
