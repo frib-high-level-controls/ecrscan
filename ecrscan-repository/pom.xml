@@ -9,12 +9,12 @@
   <parent>
     <groupId>org.csstudio</groupId>
     <artifactId>ecrscan</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.csstudio</groupId>
   <artifactId>ecrscan-repository</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
   <build>
