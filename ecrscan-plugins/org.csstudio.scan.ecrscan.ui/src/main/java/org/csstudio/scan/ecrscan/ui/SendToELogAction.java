@@ -44,7 +44,6 @@ public class SendToELogAction extends Action {
      * Construct a new action
      *
      * @param shell the parent shell (used for dialog display only)
-     * @param table the table which triggered the log action
      */
     public SendToELogAction(Shell shell) {
         this.shell = shell;

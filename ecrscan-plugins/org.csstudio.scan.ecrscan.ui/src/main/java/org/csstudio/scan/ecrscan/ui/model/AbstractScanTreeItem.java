@@ -15,7 +15,7 @@ import javafx.scene.paint.Color;
 /**
  * @author berryman
  *
- * @param <T>
+ * @param <T> ScanTreeItem
  */
 public abstract class AbstractScanTreeItem<T extends AbstractScanTreeItem<?>> {
 

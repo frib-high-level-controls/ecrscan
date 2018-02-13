@@ -56,7 +56,7 @@ public class Activator extends AbstractUIPlugin {
         plugin = the_plugin;
     }
 
-    /** @eturn The shared instance. */
+    /** @return The shared instance. */
     public static Activator getDefault()
     {
         return plugin;
