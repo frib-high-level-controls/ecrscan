@@ -4,9 +4,9 @@
   <parent>
     <groupId>org.csstudio</groupId>
     <artifactId>ecrscan-plugins</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
   </parent>
   <artifactId>org.csstudio.scan.ecrscan.ui.help</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>eclipse-plugin</packaging>
 </project>
