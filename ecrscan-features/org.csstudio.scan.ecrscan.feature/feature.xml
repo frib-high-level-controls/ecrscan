@@ -2,7 +2,7 @@
 <feature
       id="org.csstudio.scan.ecrscan.feature"
       label="ECR Scan"
-      version="1.0.6"
+      version="1.0.7.qualifier"
       provider-name="FRIB"
       plugin="org.csstudio.ecrscan">
 
